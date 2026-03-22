@@ -1,0 +1,1784 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PickTok</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #0a1628;
+      background-image: radial-gradient(ellipse at 50% 0%, #1a2a4a 0%, #0a1628 70%);
+      min-height: 100vh;
+      color: white;
+      font-family: 'Nunito', 'Segoe UI', Arial, sans-serif;
+    }
+
+    /* ============================================================
+       ÉCRANS (superposés plein écran)
+    ============================================================ */
+    .ecran {
+      position: fixed;
+      inset: 0;
+      background: transparent;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      overflow-y: auto;
+      padding: 30px 20px;
+    }
+    .ecran.cache { display: none !important; }
+
+    /* ============================================================
+       MENU PRINCIPAL
+    ============================================================ */
+    .menu-titre {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 4rem;
+      font-weight: 900;
+      letter-spacing: 8px;
+      background: linear-gradient(135deg, #f1c40f, #e67e22, #f1c40f);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 20px #f1c40f88);
+      margin-bottom: 8px;
+    }
+    .menu-sous-titre {
+      color: #8faabf;
+      font-size: 1rem;
+      margin-bottom: 48px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+    }
+    .menu-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 300px;
+    }
+    .btn-menu {
+      width: 100%;
+      padding: 14px 20px;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.15);
+      font-family: 'Nunito', Arial, sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      cursor: pointer;
+      transition: all 0.25s;
+      background: linear-gradient(135deg, #2980b9, #1a5a8a);
+      color: white;
+      box-shadow: 0 4px 20px rgba(41,128,185,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+    .btn-menu:hover { filter: brightness(1.15); transform: translateY(-3px); box-shadow: 0 8px 25px rgba(41,128,185,0.5); }
+    .btn-menu.ok  { background: linear-gradient(135deg, #27ae60, #1e8449); box-shadow: 0 4px 20px rgba(39,174,96,0.3), inset 0 1px 0 rgba(255,255,255,0.1); }
+    .btn-menu.ok:hover { box-shadow: 0 8px 25px rgba(39,174,96,0.5); }
+    .btn-menu.danger { background: linear-gradient(135deg, #c0392b, #922b21); box-shadow: 0 4px 20px rgba(192,57,43,0.3), inset 0 1px 0 rgba(255,255,255,0.1); }
+    .btn-menu.danger:hover { box-shadow: 0 8px 25px rgba(192,57,43,0.5); }
+
+    /* ============================================================
+       ÉCRAN CONFIG
+    ============================================================ */
+    .config-titre {
+      font-size: 2rem;
+      color: #f1c40f;
+      margin-bottom: 36px;
+    }
+    .config-section {
+      width: 100%;
+      max-width: 500px;
+      margin-bottom: 28px;
+      text-align: center;
+    }
+    .config-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #7f8c8d;
+      margin-bottom: 12px;
+    }
+    .btn-group { display: flex; gap: 10px; justify-content: center; }
+    .btn-choice {
+      padding: 11px 24px;
+      border-radius: 10px;
+      border: 2px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.05);
+      color: #8faabf;
+      cursor: pointer;
+      font-family: 'Nunito', Arial, sans-serif;
+      font-size: 0.95rem;
+      font-weight: 700;
+      transition: all 0.2s;
+    }
+    .btn-choice:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.4); color: white; transform: translateY(-1px); }
+    .btn-choice.actif { border-color: #1abc9c; color: #1abc9c; background: rgba(26,188,156,0.15); box-shadow: 0 0 12px rgba(26,188,156,0.3); }
+    .config-desc {
+      margin-top: 10px;
+      font-size: 0.85rem;
+      color: #e74c3c;
+      min-height: 20px;
+    }
+    .config-actions {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+    .config-actions .btn-menu { width: auto; padding: 12px 28px; }
+
+    /* ============================================================
+       ÉCRAN CHARGEMENT
+    ============================================================ */
+    .charg-titre {
+      font-size: 2rem;
+      color: #f1c40f;
+      margin-bottom: 28px;
+    }
+    #liste-saves {
+      width: 100%;
+      max-width: 680px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 60vh;
+      overflow-y: auto;
+      margin-bottom: 22px;
+    }
+    .save-item {
+      background: #2c3e50;
+      border-radius: 10px;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid #34495e;
+    }
+    .save-info { display: flex; flex-direction: column; gap: 3px; }
+    .save-nom { font-weight: bold; font-size: 0.95rem; }
+    .save-meta { font-size: 0.78rem; color: #7f8c8d; }
+    .save-actions { display: flex; gap: 8px; }
+    .btn-save-ok {
+      padding: 7px 14px; background: #27ae60; color: white;
+      border: none; border-radius: 6px; cursor: pointer; font-weight: bold;
+    }
+    .btn-save-ok:hover { background: #2ecc71; }
+    .btn-save-del {
+      padding: 7px 10px; background: #c0392b; color: white;
+      border: none; border-radius: 6px; cursor: pointer; font-weight: bold;
+    }
+    .btn-save-del:hover { background: #e74c3c; }
+
+    /* ============================================================
+       MODAL SAUVEGARDE
+    ============================================================ */
+    #modal-save {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 80;
+    }
+    #modal-save.cache { display: none !important; }
+    .modal-box {
+      background: rgba(10,22,40,0.96);
+      border-radius: 18px;
+      padding: 36px 40px;
+      text-align: center;
+      border: 2px solid rgba(26,188,156,0.5);
+      max-width: 420px;
+      width: 90%;
+      backdrop-filter: blur(20px);
+    }
+    .modal-box h3 { font-family: 'Orbitron', sans-serif; color: #1abc9c; font-size: 1.2rem; margin-bottom: 16px; }
+    .modal-box p  { color: #8faabf; font-size: 0.85rem; margin-bottom: 10px; }
+    #input-nom-save {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 2px solid rgba(26,188,156,0.5);
+      background: rgba(255,255,255,0.07);
+      color: white;
+      font-family: 'Nunito', Arial, sans-serif;
+      font-size: 1rem;
+      margin-bottom: 20px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #input-nom-save:focus { border-color: #1abc9c; }
+
+    /* ============================================================
+       JEU (l'écran principal de jeu)
+    ============================================================ */
+    #ecran-jeu {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 20px;
+      z-index: 1;
+      background: transparent;
+    }
+    #ecran-jeu.cache { display: none !important; }
+    #ecran-jeu h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.8rem;
+      font-weight: 900;
+      letter-spacing: 5px;
+      background: linear-gradient(135deg, #f1c40f, #e67e22, #f1c40f);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 10px #f1c40f66);
+      margin-bottom: 14px;
+    }
+
+    /* Layout principal du jeu */
+    #jeu { display: flex; gap: 20px; align-items: flex-start; }
+
+    /* Plateau */
+    #plateau {
+      display: grid;
+      grid-template-columns: repeat(10, 58px);
+      grid-template-rows: repeat(8, 58px);
+      gap: 3px;
+      background: #0d1f35;
+      padding: 10px;
+      border-radius: 14px;
+      border: 2px solid rgba(255,255,255,0.08);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+    }
+    .case {
+      width: 58px; height: 58px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
+    }
+    .case.neutralisee {
+      background: repeating-linear-gradient(
+        45deg,
+        rgba(0,0,0,0.5) 0px, rgba(0,0,0,0.5) 3px,
+        rgba(0,0,0,0.25) 3px, rgba(0,0,0,0.25) 6px
+      );
+      border: 1px solid rgba(0,0,0,0.4);
+      cursor: default;
+    }
+
+    /* Jetons */
+    .jeton {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: bold; font-size: 1rem;
+      transition: transform 0.15s, box-shadow 0.15s;
+      cursor: default;
+      position: relative;
+    }
+    /* Jetons capturable — effet gemme 3D */
+    .rouge.cap  { background: radial-gradient(circle at 35% 30%, #ff7675, #e74c3c 50%, #c0392b); border: 2px solid rgba(255,255,255,0.75); box-shadow: 0 4px 20px rgba(231,76,60,0.6), inset 0 1px 4px rgba(255,255,255,0.5); color: white; }
+    .bleu.cap   { background: radial-gradient(circle at 35% 30%, #74b9ff, #3498db 50%, #2471a3); border: 2px solid rgba(255,255,255,0.75); box-shadow: 0 4px 20px rgba(52,152,219,0.6), inset 0 1px 4px rgba(255,255,255,0.5); color: white; }
+    .vert.cap   { background: radial-gradient(circle at 35% 30%, #55efc4, #2ecc71 50%, #27ae60); border: 2px solid rgba(255,255,255,0.75); box-shadow: 0 4px 20px rgba(46,204,113,0.6), inset 0 1px 4px rgba(255,255,255,0.5); color: #1a252f; }
+    .jaune.cap  { background: radial-gradient(circle at 35% 30%, #ffeaa7, #f1c40f 50%, #d4ac0d); border: 2px solid rgba(255,255,255,0.75); box-shadow: 0 4px 20px rgba(241,196,15,0.6), inset 0 1px 4px rgba(255,255,255,0.5); color: #1a252f; }
+    .violet.cap { background: radial-gradient(circle at 35% 30%, #d7bde2, #9b59b6 50%, #7d3c98); border: 2px solid rgba(255,255,255,0.75); box-shadow: 0 4px 20px rgba(155,89,182,0.6), inset 0 1px 4px rgba(255,255,255,0.5); color: white; }
+    /* Jetons non-capturable — face verso sombre */
+    .rouge.ncap  { background: radial-gradient(circle, #c0392b 0%, #7b241c 100%); border: 2px solid rgba(231,76,60,0.4); opacity: 0.6; }
+    .bleu.ncap   { background: radial-gradient(circle, #2471a3 0%, #154360 100%); border: 2px solid rgba(52,152,219,0.4); opacity: 0.6; }
+    .vert.ncap   { background: radial-gradient(circle, #27ae60 0%, #145a32 100%); border: 2px solid rgba(46,204,113,0.4); opacity: 0.6; }
+    .jaune.ncap  { background: radial-gradient(circle, #d4ac0d 0%, #7d6608 100%); border: 2px solid rgba(241,196,15,0.4); opacity: 0.6; }
+    .violet.ncap { background: radial-gradient(circle, #7d3c98 0%, #4a235a 100%); border: 2px solid rgba(155,89,182,0.4); opacity: 0.6; }
+    .jeton.cap { cursor: pointer; }
+    .jeton.cap:hover { transform: scale(1.18) translateY(-2px); filter: brightness(1.2); box-shadow: 0 8px 30px rgba(255,255,255,0.35) !important; }
+    .jeton.cap::after {
+      content: '';
+      position: absolute; top: -4px; right: -4px;
+      width: 11px; height: 11px;
+      background: #2ecc71; border-radius: 50%; border: 2px solid white;
+      box-shadow: 0 0 6px #2ecc71;
+    }
+
+    /* Panneau latéral */
+    #panneau { display: flex; flex-direction: column; gap: 10px; min-width: 230px; max-width: 260px; }
+    .panel-box {
+      background: rgba(255,255,255,0.05);
+      border-radius: 14px;
+      padding: 12px 14px;
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .panel-title {
+      font-size: 0.7rem; text-transform: uppercase;
+      letter-spacing: 3px; color: rgba(255,255,255,0.4); margin-bottom: 10px;
+    }
+
+    /* Score solo */
+    #score-solo { font-size: 2.6rem; font-weight: bold; color: #f1c40f; text-align: center; text-shadow: 0 0 20px rgba(241,196,15,0.5); }
+
+    /* Râtelier solo */
+    #ratelier-solo { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    /* Section joueur en multijoueur */
+    .joueur-section {
+      background: rgba(255,255,255,0.05); border-radius: 12px;
+      padding: 12px 14px; border: 2px solid rgba(255,255,255,0.1);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      backdrop-filter: blur(10px);
+    }
+    .joueur-section.actif { border-color: #1abc9c; box-shadow: 0 0 16px rgba(26,188,156,0.25); }
+    .joueur-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 8px; flex-wrap: wrap; gap: 4px;
+    }
+    .joueur-nom { font-weight: bold; font-size: 0.95rem; }
+    .joueur-score { color: #f1c40f; font-weight: bold; font-size: 1.05rem; }
+    .joueur-timer { font-size: 0.85rem; font-weight: bold; }
+    .joueur-rack { display: flex; gap: 5px; }
+
+    /* Cases du râtelier */
+    .case-rat {
+      width: 40px; height: 40px;
+      border-radius: 8px; background: rgba(255,255,255,0.04);
+      border: 2px dashed rgba(255,255,255,0.2);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .case-rat .jeton { width: 34px; height: 34px; font-size: 0.8rem; cursor: default; }
+    .case-rat .jeton.cap::after { display: none; }
+    .case-rat .jeton.cap:hover { transform: none; box-shadow: none; }
+
+
+    /* Message */
+    #message {
+      background: rgba(255,255,255,0.05); border-radius: 10px;
+      padding: 10px 14px; font-size: 0.92rem; color: #ecf0f1;
+      border-left: 4px solid #3498db; min-height: 44px;
+      display: flex; align-items: center;
+      backdrop-filter: blur(10px);
+    }
+    #message.succes { border-left-color: #2ecc71; }
+    #message.erreur { border-left-color: #e74c3c; }
+    #message.fin    { border-left-color: #f1c40f; color: #f1c40f; }
+
+    /* Boutons du panel */
+    .panel-actions { display: flex; flex-direction: column; gap: 8px; }
+    .btn-action {
+      width: 100%; padding: 10px;
+      border-radius: 10px; border: 1px solid rgba(41,128,185,0.5);
+      font-family: 'Nunito', Arial, sans-serif;
+      font-size: 0.9rem; font-weight: 700; letter-spacing: 0.3px;
+      cursor: pointer; transition: all 0.2s;
+      background: rgba(41,128,185,0.25); color: white;
+    }
+    .btn-action:hover { background: rgba(41,128,185,0.45); transform: translateY(-1px); }
+    .btn-action.jaune { background: rgba(212,172,13,0.25); border-color: rgba(212,172,13,0.5); color: #f1c40f; }
+    .btn-action.jaune:hover { background: rgba(212,172,13,0.4); }
+
+    /* Animation flash points */
+    @keyframes fadeUp {
+      0%   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      30%  { opacity: 1; transform: translate(-50%, -70%) scale(1.3); }
+      100% { opacity: 0; transform: translate(-50%, -110%) scale(0.8); }
+    }
+    /* Animation pop capture */
+    @keyframes popOut {
+      0%   { transform: scale(1); opacity: 1; }
+      40%  { transform: scale(1.3); opacity: 0.8; }
+      100% { transform: scale(0); opacity: 0; }
+    }
+    /* Animation nouveau capturable */
+    @keyframes newCap {
+      0%   { box-shadow: 0 0 0 0 rgba(255,255,255,0.7); }
+      70%  { box-shadow: 0 0 0 10px rgba(255,255,255,0); }
+      100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
+    }
+    #flash-pts {
+      position: fixed; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.8rem; font-weight: bold; color: #f1c40f;
+      text-shadow: 0 0 30px #f1c40f, 0 0 60px rgba(241,196,15,0.5);
+      pointer-events: none;
+      z-index: 200;
+      display: none;
+    }
+    #flash-pts.animating { display: block; animation: fadeUp 1.4s ease-out forwards; }
+    .jeton.capturing { animation: popOut 0.3s ease-out forwards; pointer-events: none; }
+    .jeton.new-cap { animation: newCap 0.6s ease-out; }
+
+    /* Légende */
+    #legende { display: flex; gap: 14px; font-size: 0.78rem; color: #7f8c8d; margin-top: 8px; }
+    .leg-item { display: flex; align-items: center; gap: 5px; }
+    .leg-jeton { width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0; }
+    .leg-cap   { background: #e74c3c; border: 2px solid white; }
+    .leg-ncap  { background: radial-gradient(circle, #e74c3c 28%, white 28%, white 68%, #e74c3c 68%); border: 2px solid #e74c3c; }
+    .leg-neutr { background: #0d1b24; border: 2px solid #34495e; border-radius: 3px; }
+
+    /* ============================================================
+       JETON JOKER
+    ============================================================ */
+    @keyframes arc-en-ciel {
+      0%   { filter: hue-rotate(0deg)   brightness(1.1); }
+      100% { filter: hue-rotate(360deg) brightness(1.1); }
+    }
+    .joker.cap {
+      background: linear-gradient(135deg, #e74c3c 0%, #f1c40f 25%, #2ecc71 50%, #3498db 75%, #9b59b6 100%);
+      border: 3px solid white;
+      color: white;
+      text-shadow: 0 0 6px rgba(0,0,0,0.8);
+      animation: arc-en-ciel 2s linear infinite;
+      box-shadow: 0 0 14px rgba(255,255,255,0.6) !important;
+    }
+    .joker.ncap {
+      background: radial-gradient(circle, white 28%, transparent 28%),
+                  conic-gradient(#e74c3c, #f1c40f, #2ecc71, #3498db, #9b59b6, #e74c3c);
+      border: 3px solid #f1c40f;
+      animation: arc-en-ciel 3s linear infinite;
+    }
+    .leg-joker {
+      background: linear-gradient(135deg, #e74c3c, #f1c40f, #2ecc71, #3498db, #9b59b6);
+      border: 2px solid white;
+    }
+
+    /* ============================================================
+       HISTORIQUE DES COUPS
+    ============================================================ */
+    #box-historique { margin-top: 0; }
+    #historique-jetons { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; margin-top: 4px; }
+    .hist-jeton {
+      width: 20px; height: 20px; border-radius: 50%; border: 2px solid white;
+      flex-shrink: 0; display: inline-block;
+    }
+    .hist-jeton.rouge  { background: #e74c3c; }
+    .hist-jeton.bleu   { background: #3498db; }
+    .hist-jeton.vert   { background: #2ecc71; }
+    .hist-jeton.jaune  { background: #f1c40f; }
+    .hist-jeton.violet { background: #9b59b6; }
+    .hist-jeton.joker  {
+      background: linear-gradient(135deg, #e74c3c, #f1c40f, #2ecc71, #3498db, #9b59b6);
+    }
+
+    /* ============================================================
+       CHRONO
+    ============================================================ */
+    #chrono-display {
+      text-align: center;
+      font-size: 2.8rem;
+      font-weight: bold;
+      letter-spacing: 3px;
+      margin-top: 4px;
+      transition: color 0.3s;
+    }
+
+    /* Overlay fin de partie */
+    #overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.85);
+      align-items: center; justify-content: center;
+      z-index: 100;
+      backdrop-filter: blur(4px);
+    }
+    #overlay.visible { display: flex; }
+    #overlay-box {
+      background: rgba(10,22,40,0.96); border-radius: 20px;
+      padding: 40px 48px; text-align: center;
+      border: 2px solid rgba(241,196,15,0.5); max-width: 440px; width: 90%;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 0 60px rgba(241,196,15,0.12);
+    }
+    #overlay-box h2 { font-family: 'Orbitron', sans-serif; font-size: 2rem; color: #f1c40f; margin-bottom: 10px; }
+    #overlay-box p  { color: #8faabf; margin-bottom: 20px; font-size: 0.95rem; }
+    .score-final { font-size: 3rem; font-weight: bold; color: #f1c40f; margin: 12px 0; text-shadow: 0 0 30px rgba(241,196,15,0.6); }
+    .classement { font-size: 1rem; text-align: left; margin: 12px 0; }
+    .classement-ligne {
+      padding: 8px 12px; border-radius: 8px; margin-bottom: 6px;
+      background: rgba(255,255,255,0.07); font-weight: bold; border: 1px solid rgba(255,255,255,0.1);
+    }
+    .classement-ligne.or { color: #f1c40f; border-color: rgba(241,196,15,0.4); background: rgba(241,196,15,0.1); }
+    .overlay-btns { display: flex; gap: 12px; justify-content: center; margin-top: 8px; }
+    .btn-overlay {
+      padding: 13px 30px; border: none; border-radius: 12px;
+      font-family: 'Nunito', sans-serif; font-size: 0.98rem; font-weight: 700; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-overlay.replay { background: linear-gradient(135deg, #f1c40f, #d4ac0d); color: #1a252f; box-shadow: 0 4px 15px rgba(241,196,15,0.4); }
+    .btn-overlay.menu   { background: linear-gradient(135deg, #2980b9, #1a5a8a); color: white; box-shadow: 0 4px 15px rgba(41,128,185,0.4); }
+    .btn-overlay:hover  { filter: brightness(1.15); transform: translateY(-2px); }
+
+    /* ============================================================
+       BOUTON FLOTTANT RÈGLES
+    ============================================================ */
+    #btn-regles-flottant {
+      position: fixed;
+      top: 14px; right: 14px;
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: #f1c40f;
+      color: #1a252f;
+      border: none;
+      font-size: 1.15rem;
+      font-weight: 900;
+      cursor: pointer;
+      z-index: 300;
+      box-shadow: 0 2px 10px rgba(241,196,15,0.5);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+      line-height: 1;
+    }
+    #btn-regles-flottant:hover {
+      transform: scale(1.12);
+      box-shadow: 0 4px 18px rgba(241,196,15,0.7);
+    }
+
+    /* ============================================================
+       ÉCRAN RÈGLES DU JEU
+    ============================================================ */
+    #ecran-regles {
+      position: fixed;
+      inset: 0;
+      background: #0a1628;
+      background-image: radial-gradient(ellipse at 50% 0%, #1a2a4a 0%, #0a1628 70%);
+      z-index: 250;
+      overflow-y: auto;
+      padding: 24px 20px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #ecran-regles.cache { display: none !important; }
+
+    .regles-header {
+      width: 100%;
+      max-width: 720px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .regles-titre {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: #f1c40f;
+      letter-spacing: 4px;
+      text-shadow: 0 0 14px #f1c40f66;
+    }
+    .btn-fermer-regles {
+      background: #2c3e50;
+      border: 2px solid #34495e;
+      color: #bdc3c7;
+      border-radius: 8px;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .btn-fermer-regles:hover { border-color: #f1c40f; color: #f1c40f; }
+
+    .regles-onglets {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .regles-contenu {
+      width: 100%;
+      max-width: 720px;
+    }
+    .regles-section { display: none; }
+    .regles-section.actif { display: block; }
+
+    .regle-card {
+      background: #2c3e50;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 14px;
+      border-left: 4px solid #3498db;
+    }
+    .regle-card.vert   { border-left-color: #2ecc71; }
+    .regle-card.jaune  { border-left-color: #f1c40f; }
+    .regle-card.rouge  { border-left-color: #e74c3c; }
+    .regle-card.violet { border-left-color: #9b59b6; }
+    .regle-card.cyan   { border-left-color: #1abc9c; }
+
+    .regle-card-titre {
+      font-weight: bold;
+      font-size: 1rem;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .regle-card-titre .num {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: #3498db;
+      color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+    .regle-card.vert   .num { background: #2ecc71; color: #1a252f; }
+    .regle-card.jaune  .num { background: #f1c40f; color: #1a252f; }
+    .regle-card.rouge  .num { background: #e74c3c; }
+    .regle-card.violet .num { background: #9b59b6; }
+    .regle-card.cyan   .num { background: #1abc9c; color: #1a252f; }
+
+    .regle-card p {
+      font-size: 0.9rem;
+      color: #bdc3c7;
+      line-height: 1.55;
+    }
+    .regle-card strong { color: white; }
+
+    .regle-score-box {
+      background: #1a252f;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-top: 10px;
+      font-size: 0.88rem;
+      color: #ecf0f1;
+      border: 1px solid #2c3e50;
+    }
+    .regle-score-box .ligne-score {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 0;
+    }
+    .regle-score-box .pts {
+      background: #f1c40f;
+      color: #1a252f;
+      border-radius: 12px;
+      padding: 1px 8px;
+      font-weight: bold;
+      font-size: 0.82rem;
+      flex-shrink: 0;
+    }
+    .regle-score-box .pts.rouge { background: #e74c3c; color: white; }
+    .regle-score-box .pts.vert  { background: #2ecc71; color: #1a252f; }
+
+    .mini-jetons-demo {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .mini-demo-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: #7f8c8d;
+    }
+    .mini-jeton {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .mini-jeton.rouge-cap  { background: #e74c3c; border: 2px solid white; }
+    .mini-jeton.rouge-ncap { background: radial-gradient(circle, #e74c3c 28%, white 28%, white 68%, #e74c3c 68%); border: 2px solid #e74c3c; }
+    .mini-jeton.bleu-cap   { background: #3498db; border: 2px solid white; }
+    .mini-jeton.vert-cap   { background: #2ecc71; border: 2px solid white; }
+    .mini-jeton.jaune-cap  { background: #f1c40f; border: 2px solid white; }
+    .mini-jeton.violet-cap { background: #9b59b6; border: 2px solid white; }
+    .mini-jeton.joker-cap  {
+      background: linear-gradient(135deg, #e74c3c, #f1c40f, #2ecc71, #3498db, #9b59b6);
+      border: 2px solid white;
+    }
+
+    .regles-sous-titre {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #7f8c8d;
+      margin: 20px 0 10px;
+    }
+
+    /* ============================================================
+       RESPONSIVE — TABLETTE ≤ 820px
+    ============================================================ */
+    @media (max-width: 820px) {
+      #jeu { flex-direction: column; align-items: center; gap: 12px; }
+      #plateau {
+        grid-template-columns: repeat(10, 44px);
+        grid-template-rows: repeat(8, 44px);
+      }
+      .case { width: 44px; height: 44px; }
+      .jeton { width: 36px; height: 36px; font-size: 0.78rem; }
+      .jeton.cap::after { width: 9px; height: 9px; top: -3px; right: -3px; }
+      #panneau { min-width: unset; max-width: 100%; width: 100%; flex-direction: row; flex-wrap: wrap; }
+      .panel-box { flex: 1 1 160px; }
+      #ecran-jeu h1 { font-size: 1.4rem; margin-bottom: 8px; }
+    }
+
+    /* ============================================================
+       RESPONSIVE — MOBILE PORTRAIT ≤ 500px
+    ============================================================ */
+    @media (max-width: 500px) {
+      #ecran-jeu { padding: 8px 6px; }
+      #plateau {
+        grid-template-columns: repeat(10, 33px);
+        grid-template-rows: repeat(8, 33px);
+        gap: 2px;
+        padding: 5px;
+      }
+      .case { width: 33px; height: 33px; }
+      .jeton { width: 27px; height: 27px; font-size: 0.6rem; }
+      .jeton.cap::after { width: 7px; height: 7px; top: -2px; right: -2px; }
+      #panneau { flex-direction: column; }
+      .panel-box { flex: unset; }
+      #ecran-jeu h1 { font-size: 1.1rem; }
+      .menu-btns { width: 100%; padding: 0 16px; }
+      #groupe-mode, #groupe-diff { flex-wrap: wrap; gap: 6px; }
+      .btn-choice { padding: 9px 16px; font-size: 0.88rem; }
+      #overlay-box { padding: 20px 16px; width: 92vw; }
+      .score-final { font-size: 2.2rem; }
+      #legende { flex-wrap: wrap; gap: 6px 10px; font-size: 0.72rem; }
+    }
+
+    /* ============================================================
+       RESPONSIVE — TRÈS PETIT MOBILE ≤ 360px
+    ============================================================ */
+    @media (max-width: 360px) {
+      #plateau {
+        grid-template-columns: repeat(10, 29px);
+        grid-template-rows: repeat(8, 29px);
+      }
+      .case { width: 29px; height: 29px; }
+      .jeton { width: 23px; height: 23px; font-size: 0.55rem; }
+    }
+  </style>
+</head>
+<body>
+<!-- Bouton flottant Règles (accessible depuis tous les écrans) -->
+<button id="btn-regles-flottant" onclick="afficherRegles()" title="Règles du jeu">?</button>
+
+
+<!-- ============================================================
+     ÉCRAN MENU PRINCIPAL
+============================================================ -->
+<div id="ecran-menu" class="ecran">
+  <h1 class="menu-titre">PICKTOK</h1>
+  <p class="menu-sous-titre">Jeu de plateau — Game Fan-Attic</p>
+  <div class="menu-btns">
+    <button class="btn-menu ok"     onclick="afficherEcran('config')">► Jouer</button>
+    <button class="btn-menu"        onclick="ouvrirChargement()">📂 Charger une partie</button>
+    <button class="btn-menu"        onclick="afficherRegles()">📖 Règles du jeu</button>
+    <button class="btn-menu danger" onclick="quitter()">✕ Quitter</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     ÉCRAN CONFIG
+============================================================ -->
+<div id="ecran-config" class="ecran cache">
+  <h2 class="config-titre">Nouvelle partie</h2>
+
+  <div class="config-section">
+    <div class="config-label">Mode de jeu</div>
+    <div class="btn-group" id="groupe-mode">
+      <button class="btn-choice actif" onclick="choisirMode('solo')">Solo</button>
+      <button class="btn-choice"       onclick="choisirMode('chrono')">⏱ Chrono</button>
+      <button class="btn-choice"       onclick="choisirMode('duo')">Duo</button>
+      <button class="btn-choice"       onclick="choisirMode('trio')">Trio</button>
+    </div>
+    <p id="desc-mode" class="config-desc"></p>
+  </div>
+
+  <div class="config-section">
+    <div class="config-label">Difficulté</div>
+    <div class="btn-group" id="groupe-diff">
+      <button class="btn-choice actif" onclick="choisirDiff('facile')">Facile</button>
+      <button class="btn-choice"       onclick="choisirDiff('normal')">Normal</button>
+      <button class="btn-choice"       onclick="choisirDiff('difficile')">Difficile</button>
+    </div>
+    <p id="desc-diff" class="config-desc"></p>
+  </div>
+
+  <div class="config-actions">
+    <button class="btn-menu" onclick="afficherEcran('menu')">← Retour</button>
+    <button class="btn-menu ok" onclick="commencerPartie()">Commencer</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     ÉCRAN CHARGEMENT
+============================================================ -->
+<div id="ecran-chargement" class="ecran cache">
+  <h2 class="charg-titre">📂 Charger une partie</h2>
+  <div id="liste-saves"></div>
+  <div class="config-actions">
+    <button class="btn-menu" onclick="afficherEcran('menu')">← Retour</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL SAUVEGARDE
+============================================================ -->
+<div id="modal-save" class="cache">
+  <div class="modal-box">
+    <h3>💾 Sauvegarder la partie</h3>
+    <p>Donne un nom à ta partie :</p>
+    <input type="text" id="input-nom-save" placeholder="Ex: Partie de Jean..."
+           maxlength="40" onkeydown="if(event.key==='Enter') confirmerSave()">
+    <div class="config-actions">
+      <button class="btn-menu danger" onclick="fermerModalSave()">Annuler</button>
+      <button class="btn-menu ok"     onclick="confirmerSave()">💾 Sauvegarder</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     ÉCRAN JEU
+============================================================ -->
+<div id="ecran-jeu" class="cache">
+  <h1>PICKTOK</h1>
+
+  <div id="jeu">
+    <!-- Plateau -->
+    <div id="plateau-container">
+      <div id="plateau"></div>
+      <div id="legende">
+        <div class="leg-item"><div class="leg-jeton leg-cap"></div> Capturable</div>
+        <div class="leg-item"><div class="leg-jeton leg-ncap"></div> Non capturable</div>
+        <div class="leg-item"><div class="leg-jeton leg-neutr"></div> Case noire</div>
+        <div class="leg-item"><div class="leg-jeton leg-joker"></div> Joker ★</div>
+      </div>
+    </div>
+
+    <!-- Panneau latéral -->
+    <div id="panneau">
+      <div id="message">Bonne chance !</div>
+
+      <!-- Zone joueurs (construite dynamiquement) -->
+      <div id="zone-joueurs"></div>
+
+      <!-- Score solo (affiché uniquement en solo) -->
+      <div class="panel-box" id="box-score-solo" style="display:none;">
+        <div class="panel-title">Score</div>
+        <div id="score-solo">0</div>
+      </div>
+
+      <!-- Râtelier solo -->
+      <div class="panel-box" id="box-rat-solo" style="display:none;">
+        <div class="panel-title">Râtelier — 5 cases</div>
+        <div id="ratelier-solo"></div>
+      </div>
+
+      <!-- Chrono global (mode Chrono) -->
+      <div class="panel-box" id="box-chrono" style="display:none;">
+        <div class="panel-title">⏱ Chrono</div>
+        <div id="chrono-display">3:00</div>
+      </div>
+
+      <!-- Historique des coups -->
+      <div class="panel-box" id="box-historique">
+        <div class="panel-title">Derniers capturés</div>
+        <div id="historique-jetons"></div>
+      </div>
+
+      <!-- Boutons -->
+      <div class="panel-actions">
+        <button class="btn-action jaune" onclick="afficherEcran('config')">↩ Rejouer</button>
+        <button class="btn-action"       onclick="ouvrirModalSave()">💾 Sauvegarder</button>
+        <button class="btn-action"       onclick="afficherEcran('menu')">🏠 Menu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     OVERLAY FIN DE PARTIE
+============================================================ -->
+<div id="overlay">
+  <div id="overlay-box">
+    <h2 id="overlay-titre">Fin de partie</h2>
+    <div id="overlay-contenu"></div>
+    <p id="overlay-msg"></p>
+    <div class="overlay-btns">
+      <button class="btn-overlay replay" onclick="rejouer()">↩ Rejouer</button>
+      <button class="btn-overlay menu"   onclick="allerMenu()">🏠 Menu</button>
+    </div>
+  </div>
+</div>
+
+<!-- Animation flash points -->
+<div id="flash-pts"></div>
+
+<!-- ============================================================
+     ÉCRAN RÈGLES DU JEU
+============================================================ -->
+<div id="ecran-regles" class="cache">
+
+  <div class="regles-header">
+    <div class="regles-titre">RÈGLES</div>
+    <button class="btn-fermer-regles" onclick="fermerRegles()">✕ Fermer</button>
+  </div>
+
+  <!-- Onglets -->
+  <div class="regles-onglets">
+    <button class="btn-choice actif" id="ong-general" onclick="changerOngletRegles('general')">🎯 Général</button>
+    <button class="btn-choice"       id="ong-solo"    onclick="changerOngletRegles('solo')">👤 Solo</button>
+    <button class="btn-choice"       id="ong-multi"   onclick="changerOngletRegles('multi')">👥 Multijoueur</button>
+  </div>
+
+  <div class="regles-contenu">
+
+    <!-- ═══════════════ ONGLET GÉNÉRAL ═══════════════ -->
+    <div id="section-general" class="regles-section actif">
+
+      <div class="regle-card">
+        <div class="regle-card-titre"><span class="num">🎲</span> Le matériel</div>
+        <p>
+          Un <strong>plateau 10 × 8</strong> rempli de jetons colorés.
+          Un <strong>râtelier de 5 cases</strong> où tu stockes les jetons capturés.
+          Les jetons existent en <strong>5 couleurs</strong> (rouge, bleu, vert, jaune, violet) et en version spéciale <strong>Joker ★</strong>.
+        </p>
+        <div class="mini-jetons-demo">
+          <div class="mini-demo-item"><div class="mini-jeton rouge-cap"></div> Rouge</div>
+          <div class="mini-demo-item"><div class="mini-jeton bleu-cap"></div> Bleu</div>
+          <div class="mini-demo-item"><div class="mini-jeton vert-cap"></div> Vert</div>
+          <div class="mini-demo-item"><div class="mini-jeton jaune-cap"></div> Jaune</div>
+          <div class="mini-demo-item"><div class="mini-jeton violet-cap"></div> Violet</div>
+          <div class="mini-demo-item"><div class="mini-jeton joker-cap"></div> Joker ★</div>
+        </div>
+      </div>
+
+      <div class="regle-card vert">
+        <div class="regle-card-titre"><span class="num">1</span> Faces des jetons</div>
+        <p>Chaque jeton a <strong>deux faces</strong> :</p>
+        <div class="mini-jetons-demo">
+          <div class="mini-demo-item"><div class="mini-jeton rouge-cap"></div> <span><strong style="color:white">Couleur pleine</strong> = Capturable (tu peux le prendre)</span></div>
+          <div class="mini-demo-item"><div class="mini-jeton rouge-ncap"></div> <span><strong style="color:white">Couleur partielle</strong> = Non capturable (bloqué)</span></div>
+        </div>
+      </div>
+
+      <div class="regle-card jaune">
+        <div class="regle-card-titre"><span class="num">2</span> Mise en place</div>
+        <p>
+          Tous les jetons sont placés <strong>face non capturable</strong> sur le plateau.
+          Seuls les jetons de la <strong>première ligne</strong> sont retournés face capturable au début.
+          Le râtelier est <strong>vide</strong>.
+        </p>
+      </div>
+
+      <div class="regle-card cyan">
+        <div class="regle-card-titre"><span class="num">3</span> Capturer un jeton</div>
+        <p>
+          Clique sur un jeton <strong>capturable</strong> (couleur pleine, point vert ●) pour le déplacer dans ton râtelier.
+          Après chaque capture, les <strong>voisins directs</strong> (haut, bas, gauche, droite — pas les diagonales) du jeton capturé sont automatiquement <strong>retournés</strong> côté capturable.
+        </p>
+      </div>
+
+      <div class="regle-card violet">
+        <div class="regle-card-titre"><span class="num">★</span> Le Joker</div>
+        <p>Le jeton <strong>Joker ★</strong> (arc-en-ciel) peut compléter <strong>n'importe quelle triplette</strong> de couleur. C'est la pièce la plus précieuse du jeu !</p>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════ ONGLET SOLO ═══════════════ -->
+    <div id="section-solo" class="regles-section">
+
+      <div class="regle-card cyan">
+        <div class="regle-card-titre"><span class="num">1</span> Objectif</div>
+        <p>Capturer un maximum de jetons et marquer le plus de points possible en retirant des <strong>triplettes</strong> de même couleur.</p>
+      </div>
+
+      <div class="regle-card vert">
+        <div class="regle-card-titre"><span class="num">2</span> La triplette</div>
+        <p>Dès que ton râtelier contient <strong>3 jetons de même couleur</strong>, ils sont automatiquement retirés du jeu et tu marques des points !</p>
+        <div class="regle-score-box">
+          <div class="ligne-score"><span class="pts vert">+2 pts</span> Si le râtelier était <strong>plein</strong> au moment du retrait</div>
+          <div class="ligne-score"><span class="pts">+1 pt</span> Si le râtelier n'était pas plein</div>
+        </div>
+      </div>
+
+      <div class="regle-card rouge">
+        <div class="regle-card-titre"><span class="num">3</span> Fin de partie</div>
+        <p>La partie se termine si le <strong>râtelier est plein</strong> (5 jetons) sans qu'une triplette soit possible.</p>
+        <p style="margin-top:8px">La partie continue tant qu'il reste des <strong>jetons capturables</strong> sur le plateau.</p>
+      </div>
+
+      <div class="regle-card jaune">
+        <div class="regle-card-titre"><span class="num">🏆</span> Bonus</div>
+        <p>Si tu réussis à éliminer <strong>tous les jetons du plateau</strong>, tu remportes un <strong>bonus de points</strong> !</p>
+      </div>
+
+      <div class="regle-card">
+        <div class="regle-card-titre"><span class="num">⏱</span> Mode Chrono</div>
+        <p>Même règles que le Solo, mais tu dois faire le meilleur score possible avant que le <strong>temps imparti</strong> soit écoulé !</p>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════ ONGLET MULTIJOUEUR ═══════════════ -->
+    <div id="section-multi" class="regles-section">
+
+      <div class="regle-card cyan">
+        <div class="regle-card-titre"><span class="num">1</span> Tour par tour</div>
+        <p>Les joueurs jouent <strong>à tour de rôle</strong>. À chaque tour, le joueur actif (encadré vert) capture un jeton et le place dans le râtelier partagé.</p>
+      </div>
+
+      <div class="regle-card vert">
+        <div class="regle-card-titre"><span class="num">2</span> Marquer des points</div>
+        <p>C'est le joueur qui pose le <strong>dernier jeton d'une triplette</strong> qui marque les points.</p>
+        <div class="regle-score-box">
+          <div class="ligne-score"><span class="pts vert">+2 pts</span> Si le râtelier était <strong>plein</strong> et qu'une triplette est retirée</div>
+          <div class="ligne-score"><span class="pts">+1 pt</span> Si le râtelier n'était pas plein et qu'une triplette est retirée</div>
+        </div>
+      </div>
+
+      <div class="regle-card rouge">
+        <div class="regle-card-titre"><span class="num">3</span> Remplir sans triplette = pénalité</div>
+        <p>Si un joueur <strong>remplit le râtelier</strong> (5 jetons) sans créer de triplette, son score est <strong>remis à zéro</strong> et la partie s'arrête immédiatement.</p>
+        <div class="regle-score-box">
+          <div class="ligne-score"><span class="pts rouge">0 pt</span> Le joueur fautif perd tous ses points</div>
+        </div>
+      </div>
+
+      <div class="regle-card jaune">
+        <div class="regle-card-titre"><span class="num">4</span> Fin de partie</div>
+        <p>La partie se termine quand il n'y a <strong>plus aucun jeton capturable</strong> sur le plateau. Le joueur avec le <strong>plus grand score</strong> remporte la partie !</p>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+//  CONSTANTES
+// ============================================================
+const NB_COL = 10;
+const NB_LIG = 8;
+const TAILLE_RAT = 5;
+const BONUS_VIDE = 20;
+const COULEURS = ["rouge", "bleu", "vert", "jaune", "violet"];
+const CLE_SAVES = "picktok_sauvegardes";
+const MAX_SAVES = 15;
+const NB_NOIRES = { facile: 6, normal: 12, difficile: 18 };
+const TIMERS    = { facile: null, normal: null, difficile: 120 };
+
+// ============================================================
+//  ÉTAT DU JEU
+// ============================================================
+let modeJeu     = "solo";   // "solo" | "chrono" | "duo" | "trio"
+let difficulte  = "facile"; // "facile" | "normal" | "difficile"
+let casesNoires = new Set();
+let plateau     = [];       // plateau[col][lig] = {couleur, capturable} | null
+let rateliers   = [[]];     // rateliers[i] = tableau de {couleur} pour joueur i
+let scores      = [0];
+let joueurActif = 0;
+let tempsRestants = [null]; // null = pas de timer
+let partieTerminee = false;
+let timerInterval  = null;
+let historique     = [];    // [{couleur, joueur}]
+let nouveauxCapturables = new Set(); // positions "col,lig" des jetons qui viennent de devenir capturables
+
+
+// ============================================================
+//  NAVIGATION ENTRE ÉCRANS
+// ============================================================
+function afficherEcran(nom) {
+  ["menu", "config", "chargement"].forEach(e =>
+    document.getElementById("ecran-" + e).classList.toggle("cache", e !== nom)
+  );
+  document.getElementById("ecran-jeu").classList.toggle("cache", nom !== "jeu");
+  document.getElementById("modal-save").classList.add("cache");
+  document.getElementById("overlay").classList.remove("visible");
+}
+
+function quitter() {
+  if (!window.close()) {
+    afficherEcran("menu");
+  }
+}
+
+function afficherRegles() {
+  document.getElementById("ecran-regles").classList.remove("cache");
+}
+
+function fermerRegles() {
+  document.getElementById("ecran-regles").classList.add("cache");
+}
+
+function changerOngletRegles(onglet) {
+  ["general", "solo", "multi"].forEach(o => {
+    document.getElementById("section-" + o).classList.toggle("actif", o === onglet);
+    document.getElementById("ong-" + o).classList.toggle("actif", o === onglet);
+  });
+}
+
+// ============================================================
+//  CONFIGURATION
+// ============================================================
+function choisirMode(m) {
+  modeJeu = m;
+  document.querySelectorAll("#groupe-mode .btn-choice").forEach((btn, i) => {
+    btn.classList.toggle("actif", ["solo","chrono","duo","trio"][i] === m);
+  });
+  const desc = document.getElementById("desc-mode");
+  if (desc) desc.textContent = m === "chrono" ? "⏱ Score maximum en 3 minutes — 1 joueur, pas de timer par tour." : "";
+}
+
+function choisirDiff(d) {
+  difficulte = d;
+  document.querySelectorAll("#groupe-diff .btn-choice").forEach((btn, i) => {
+    btn.classList.toggle("actif", ["facile","normal","difficile"][i] === d);
+  });
+  const desc = document.getElementById("desc-diff");
+  desc.textContent = d === "difficile"
+    ? "⏱ Timer 2 minutes par joueur — faites vite !"
+    : "";
+}
+
+// ============================================================
+//  GÉNÉRATION DES CASES NOIRES (BFS)
+// ============================================================
+function genererCasesNoires(diff) {
+  const nb = NB_NOIRES[diff];
+  if (nb === 0) return new Set();
+
+  // Candidats : toutes les cases sauf la ligne 0
+  const candidats = [];
+  for (let col = 0; col < NB_COL; col++)
+    for (let lig = 1; lig < NB_LIG; lig++)
+      candidats.push(col + "," + lig);
+
+  for (let t = 0; t < 200; t++) {
+    const essai = new Set(tirerAleat(candidats, nb));
+    if (plateauJouable(essai)) return essai;
+  }
+  return new Set(tirerAleat(candidats, Math.floor(nb / 2)));
+}
+
+function tirerAleat(arr, n) {
+  return [...arr].sort(() => Math.random() - 0.5).slice(0, n);
+}
+
+function plateauJouable(casesN) {
+  const total = NB_COL * NB_LIG;
+  const libres = total - casesN.size;
+  if (libres < total * 0.5) return false;
+
+  let lig0 = 0;
+  for (let col = 0; col < NB_COL; col++)
+    if (!casesN.has(col + ",0")) lig0++;
+  if (lig0 < 5) return false;
+
+  // BFS depuis ligne 0
+  const depart = [];
+  for (let col = 0; col < NB_COL; col++)
+    if (!casesN.has(col + ",0")) depart.push(col + ",0");
+
+  const visites = new Set(depart);
+  const file = [...depart];
+  while (file.length > 0) {
+    const pos = file.pop();
+    const [c, l] = pos.split(",").map(Number);
+    for (const [dc, dl] of [[0,1],[0,-1],[1,0],[-1,0]]) {
+      const nc = c + dc, nl = l + dl;
+      if (nc >= 0 && nc < NB_COL && nl >= 0 && nl < NB_LIG) {
+        const k = nc + "," + nl;
+        if (!casesN.has(k) && !visites.has(k)) {
+          visites.add(k);
+          file.push(k);
+        }
+      }
+    }
+  }
+  // 100% des cases libres doivent être accessibles depuis la ligne 0
+  // (garantit qu'aucun jeton n'est jamais enfermé dans une poche noire)
+  return visites.size >= libres;
+}
+
+// ============================================================
+//  DÉMARRAGE D'UNE PARTIE
+// ============================================================
+function nbJ() { return { solo: 1, chrono: 1, duo: 2, trio: 3 }[modeJeu]; }
+function nomJoueur(i) { return ["Joueur 1", "Joueur 2", "Joueur 3"][i]; }
+
+function commencerPartie() {
+  const nb = nbJ();
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+
+  casesNoires = genererCasesNoires(difficulte);
+  rateliers   = Array.from({length: nb}, () => []);
+  scores      = Array(nb).fill(0);
+  joueurActif = 0;
+  partieTerminee = false;
+  historique  = [];
+  nouveauxCapturables = new Set();
+
+  // Timer : chrono = 180s globaux, difficile = timer par joueur, sinon pas de timer
+  if (modeJeu === "chrono") {
+    tempsRestants = [180];
+  } else {
+    const tInit = TIMERS[difficulte];
+    tempsRestants = Array(nb).fill(tInit !== null ? tInit : null);
+  }
+
+  // Construire le plateau
+  plateau = [];
+  for (let col = 0; col < NB_COL; col++) {
+    plateau[col] = [];
+    for (let lig = 0; lig < NB_LIG; lig++) {
+      if (casesNoires.has(col + "," + lig)) {
+        plateau[col][lig] = null;
+      } else {
+        // 5% de chance d'être un joker
+        const couleur = Math.random() < 0.05 ? "joker" : COULEURS[Math.floor(Math.random() * COULEURS.length)];
+        plateau[col][lig] = { couleur, capturable: lig === 0 };
+      }
+    }
+  }
+
+  afficherEcran("jeu");
+  setMessage("Cliquez sur un jeton capturable (point vert) pour commencer.", "");
+  afficher();
+
+  if (modeJeu === "chrono" || difficulte === "difficile") demarrerTimer();
+}
+
+// ============================================================
+//  LOGIQUE DE JEU
+// ============================================================
+function capturer(col, lig) {
+  if (partieTerminee) return;
+
+  const jeton = plateau[col][lig];
+  if (!jeton || !jeton.capturable) {
+    setMessage("Ce jeton n'est pas capturable.", "erreur");
+    return;
+  }
+
+  const r = rateliers[joueurActif];
+  if (r.length >= TAILLE_RAT) {
+    setMessage("Ton râtelier est plein ! Impossible de capturer.", "erreur");
+    return;
+  }
+
+  // Animation pop sur le jeton DOM avant de reconstruire le plateau
+  const gridCases = document.querySelectorAll("#plateau .case");
+  const jetonEl = gridCases[lig * NB_COL + col] ? gridCases[lig * NB_COL + col].querySelector(".jeton") : null;
+  if (jetonEl) jetonEl.classList.add("capturing");
+
+  // Retirer du plateau
+  const couleur = jeton.couleur;
+  plateau[col][lig] = null;
+
+  // Retourner voisins (et tracker les nouveaux capturables pour animation)
+  nouveauxCapturables = new Set();
+  for (const [vc, vl] of [[col,lig-1],[col,lig+1],[col+1,lig],[col-1,lig]]) {
+    if (vc >= 0 && vc < NB_COL && vl >= 0 && vl < NB_LIG
+        && plateau[vc][vl] && !plateau[vc][vl].capturable) {
+      plateau[vc][vl].capturable = true;
+      nouveauxCapturables.add(vc + "," + vl);
+    }
+  }
+
+  r.push({ couleur });
+  historique.push({ couleur, joueur: joueurActif });
+  const rPlein = (r.length === TAILLE_RAT);
+  const nom = nbJ() > 1 ? nomJoueur(joueurActif) + " : " : "";
+  let msg = nom + "jeton " + couleur + " capturé !";
+
+  // Vérifier triplet dans le rack du joueur actif
+  const triplet = chercherTriplet(r);
+  if (triplet) {
+    const pts = rPlein ? 2 : 1;
+    retirerTriplet(r, triplet, pts);
+    msg += "  Triplet " + triplet + " ! +" + pts + " pt(s).";
+    flashPoints("+" + pts + " pts !");
+    setMessage(msg, "succes");
+  } else if (rPlein) {
+    // Rack plein sans triplet
+    scores[joueurActif] = 0;
+    partieTerminee = true;
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    afficher();
+    finDePartie(
+      "Râtelier bloqué !",
+      nomJoueur(joueurActif) + " a rempli son râtelier sans triplet — score remis à zéro.",
+      buildScoreTexte()
+    );
+    return;
+  } else {
+    setMessage(msg, "");
+  }
+
+  // Passer au joueur suivant
+  if (!partieTerminee && nbJ() > 1) {
+    joueurActif = (joueurActif + 1) % nbJ();
+  }
+
+  // Vérifier fin (plus de capturables)
+  if (!partieTerminee && getTousCapturables().length === 0) {
+    partieTerminee = true;
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    const tousRetires = estVide();
+    if ((modeJeu === "solo" || modeJeu === "chrono") && tousRetires) scores[0] += BONUS_VIDE;
+    afficher();
+    if (modeJeu === "solo" || modeJeu === "chrono") {
+      finDePartie(
+        tousRetires ? "BRAVO !!!" : "Fin de partie",
+        tousRetires ? "Bonus +" + BONUS_VIDE + " pts — tous les jetons éliminés !" : "Plus aucun jeton capturable.",
+        "Score : " + scores[0] + " pt(s)"
+      );
+    } else {
+      finDePartie("Fin de partie !", buildGagnant(), buildScoreTexte());
+    }
+    return;
+  }
+
+  afficher();
+}
+
+function chercherTriplet(rack) {
+  const jokers = rack.filter(j => j.couleur === "joker").length;
+  const cpt = {};
+  for (const j of rack) {
+    if (j.couleur === "joker") continue;
+    cpt[j.couleur] = (cpt[j.couleur] || 0) + 1;
+    if (cpt[j.couleur] + jokers >= 3) return j.couleur;
+  }
+  if (jokers >= 3) return "joker"; // 3 jokers seuls = triplette joker
+  return null;
+}
+
+function retirerTriplet(rack, couleur, pts) {
+  // Retire 3 jetons de la couleur donnée (les jokers complètent si nécessaire)
+  let n = 0;
+  const nouveau = rack.filter(j => {
+    if (n < 3 && (j.couleur === couleur || j.couleur === "joker")) { n++; return false; }
+    return true;
+  });
+  rack.length = 0;
+  rack.push(...nouveau);
+  scores[joueurActif] += pts;
+}
+
+function getTousCapturables() {
+  const res = [];
+  for (let col = 0; col < NB_COL; col++)
+    for (let lig = 0; lig < NB_LIG; lig++)
+      if (plateau[col][lig] && plateau[col][lig].capturable)
+        res.push([col, lig]);
+  return res;
+}
+
+function estVide() {
+  for (let col = 0; col < NB_COL; col++)
+    for (let lig = 0; lig < NB_LIG; lig++)
+      if (plateau[col][lig]) return false;
+  return true;
+}
+
+function buildScoreTexte() {
+  if (modeJeu === "solo" || modeJeu === "chrono") return "Score : " + scores[0] + " pt(s)";
+  return scores.slice(0, nbJ()).map((s, i) => nomJoueur(i) + " : " + s + " pts").join("  |  ");
+}
+
+function buildGagnant() {
+  const nb = nbJ();
+  const max = Math.max(...scores.slice(0, nb));
+  const gagnants = [];
+  for (let i = 0; i < nb; i++) if (scores[i] === max) gagnants.push(nomJoueur(i));
+  return gagnants.length === 1 ? gagnants[0] + " gagne !" : "Égalité entre " + gagnants.join(" et ") + " !";
+}
+
+// ============================================================
+//  TIMER (mode difficile)
+// ============================================================
+function formaterTemps(s) {
+  s = Math.ceil(Math.max(0, s));
+  return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+}
+function couleurTimer(s) {
+  if (s <= 30) return "#e74c3c";
+  if (s <= 60) return "#f1c40f";
+  return "#ecf0f1";
+}
+
+function demarrerTimer() {
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    if (partieTerminee) { clearInterval(timerInterval); return; }
+
+    if (modeJeu === "chrono") {
+      // Timer global décroissant
+      tempsRestants[0] = Math.max(0, tempsRestants[0] - 0.1);
+      const el = document.getElementById("chrono-display");
+      if (el) {
+        el.textContent = formaterTemps(tempsRestants[0]);
+        el.style.color = couleurTimer(tempsRestants[0]);
+      }
+      if (tempsRestants[0] <= 0) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        partieTerminee = true;
+        afficher();
+        finDePartie("⏱ Temps écoulé !", "Le temps est épuisé — voici ton score !", "Score : " + scores[0] + " pt(s)");
+      }
+      return;
+    }
+
+    const j = joueurActif;
+    if (tempsRestants[j] === null) return;
+    tempsRestants[j] = Math.max(0, tempsRestants[j] - 0.1);
+
+    // Mettre à jour l'affichage du timer uniquement (éviter de reconstruire tout)
+    const el = document.getElementById("timer-j" + j);
+    if (el) {
+      el.textContent = "⏱ " + formaterTemps(tempsRestants[j]);
+      el.style.color = couleurTimer(tempsRestants[j]);
+    }
+
+    if (tempsRestants[j] <= 0) {
+      setMessage("⏱ Temps écoulé pour " + nomJoueur(j) + " !", "erreur");
+      const nb = nbJ();
+      const tousEpuises = tempsRestants.slice(0, nb).every(t => t !== null && t <= 0);
+      if (tousEpuises) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        partieTerminee = true;
+        afficher();
+        finDePartie("Temps écoulé !", "Tous les joueurs ont épuisé leur temps.", buildScoreTexte());
+        return;
+      }
+      // Passer au suivant avec du temps
+      let suivant = (j + 1) % nb;
+      while (tempsRestants[suivant] !== null && tempsRestants[suivant] <= 0)
+        suivant = (suivant + 1) % nb;
+      joueurActif = suivant;
+      afficher();
+    }
+  }, 100);
+}
+
+// ============================================================
+//  AFFICHAGE
+// ============================================================
+function afficher() {
+  afficherPlateau();
+  afficherZoneJoueurs();
+}
+
+function afficherPlateau() {
+  const div = document.getElementById("plateau");
+  div.innerHTML = "";
+  for (let lig = 0; lig < NB_LIG; lig++) {
+    for (let col = 0; col < NB_COL; col++) {
+      const caseDiv = document.createElement("div");
+      if (casesNoires.has(col + "," + lig)) {
+        caseDiv.className = "case neutralisee";
+        div.appendChild(caseDiv);
+        continue;
+      }
+      caseDiv.className = "case";
+      const jeton = plateau[col][lig];
+      if (jeton) {
+        const el = document.createElement("div");
+        const face = jeton.capturable ? "cap" : "ncap";
+        el.className = "jeton " + jeton.couleur + " " + face;
+        el.title = jeton.capturable
+          ? "Capturer : " + jeton.couleur
+          : "Non capturable : " + jeton.couleur;
+        if (jeton.capturable && !partieTerminee) {
+          const c = col, l = lig;
+          caseDiv.style.cursor = "pointer";
+          caseDiv.addEventListener("click", () => capturer(c, l));
+          // Animation pulse pour les jetons qui viennent de devenir capturables
+          if (nouveauxCapturables.has(col + "," + lig)) {
+            el.classList.add("new-cap");
+          }
+        }
+        caseDiv.appendChild(el);
+      }
+      div.appendChild(caseDiv);
+    }
+  }
+}
+
+function afficherZoneJoueurs() {
+  const nb = nbJ();
+  const zone = document.getElementById("zone-joueurs");
+  zone.innerHTML = "";
+
+  // Affichage chrono global
+  const boxChrono = document.getElementById("box-chrono");
+  if (boxChrono) {
+    const visible = modeJeu === "chrono";
+    boxChrono.style.display = visible ? "" : "none";
+    if (visible) {
+      const el = document.getElementById("chrono-display");
+      if (el) {
+        el.textContent = formaterTemps(tempsRestants[0]);
+        el.style.color = couleurTimer(tempsRestants[0]);
+      }
+    }
+  }
+
+  // Historique des coups
+  const histEl = document.getElementById("historique-jetons");
+  if (histEl) {
+    const derniers = historique.slice(-5).reverse();
+    histEl.innerHTML = derniers.length === 0
+      ? '<span style="color:#7f8c8d;font-size:0.85rem">Aucun coup joué</span>'
+      : derniers.map(h =>
+          '<span class="hist-jeton ' + h.couleur + '" title="' + h.couleur + '"></span>'
+        ).join("");
+  }
+
+  const soloScore = document.getElementById("box-score-solo");
+  const soloRat   = document.getElementById("box-rat-solo");
+
+  if (modeJeu === "solo" || modeJeu === "chrono") {
+    soloScore.style.display = "";
+    soloRat.style.display   = "";
+    document.getElementById("score-solo").textContent = scores[0];
+    // Afficher le râtelier solo
+    const rat = document.getElementById("ratelier-solo");
+    rat.innerHTML = "";
+    const r = rateliers[0];
+    for (let i = 0; i < TAILLE_RAT; i++) {
+      const caseDiv = document.createElement("div");
+      caseDiv.className = "case-rat";
+      if (i < r.length) {
+        const el = document.createElement("div");
+        el.className = "jeton " + r[i].couleur + " cap";
+        caseDiv.appendChild(el);
+      }
+      rat.appendChild(caseDiv);
+    }
+  } else {
+    soloScore.style.display = "none";
+    soloRat.style.display   = "none";
+    // Afficher une section par joueur
+    for (let i = 0; i < nb; i++) {
+      const sect = document.createElement("div");
+      sect.className = "joueur-section" + (i === joueurActif && !partieTerminee ? " actif" : "");
+
+      // En-tête : nom | score | timer
+      const header = document.createElement("div");
+      header.className = "joueur-header";
+
+      const nomEl = document.createElement("span");
+      nomEl.className = "joueur-nom";
+      nomEl.textContent = (i === joueurActif && !partieTerminee ? "► " : "") + nomJoueur(i);
+      header.appendChild(nomEl);
+
+      const scoreEl = document.createElement("span");
+      scoreEl.className = "joueur-score";
+      scoreEl.textContent = scores[i] + " pts";
+      header.appendChild(scoreEl);
+
+      if (tempsRestants[i] !== null) {
+        const timerEl = document.createElement("span");
+        timerEl.className = "joueur-timer";
+        timerEl.id = "timer-j" + i;
+        timerEl.textContent = "⏱ " + formaterTemps(tempsRestants[i]);
+        timerEl.style.color = couleurTimer(tempsRestants[i]);
+        header.appendChild(timerEl);
+      }
+
+      sect.appendChild(header);
+
+      // Râtelier
+      const rack = document.createElement("div");
+      rack.className = "joueur-rack";
+      const r = rateliers[i];
+      for (let slot = 0; slot < TAILLE_RAT; slot++) {
+        const caseDiv = document.createElement("div");
+        caseDiv.className = "case-rat";
+        if (slot < r.length) {
+          const el = document.createElement("div");
+          el.className = "jeton " + r[slot].couleur + " cap";
+          caseDiv.appendChild(el);
+        }
+        rack.appendChild(caseDiv);
+      }
+      sect.appendChild(rack);
+      zone.appendChild(sect);
+    }
+  }
+}
+
+function setMessage(texte, type) {
+  const el = document.getElementById("message");
+  el.textContent = texte;
+  el.className = type || "";
+}
+
+// ============================================================
+//  ANIMATION FLASH POINTS
+// ============================================================
+function flashPoints(texte) {
+  const el = document.getElementById("flash-pts");
+  el.textContent = texte;
+  el.classList.remove("animating");
+  void el.offsetWidth; // force reflow
+  el.classList.add("animating");
+  setTimeout(() => el.classList.remove("animating"), 1500);
+}
+
+// ============================================================
+//  OVERLAY FIN DE PARTIE
+// ============================================================
+function finDePartie(titre, details, scoreTexte) {
+  document.getElementById("overlay-titre").textContent = titre;
+  document.getElementById("overlay-msg").textContent   = details;
+
+  const contenu = document.getElementById("overlay-contenu");
+  const nb = nbJ();
+
+  if (nb === 1) {
+    contenu.innerHTML = '<div class="score-final">' + scoreTexte + '</div>';
+  } else {
+    // Classement avec médailles
+    const classement = Array.from({length: nb}, (_, i) => ({ nom: nomJoueur(i), score: scores[i] }));
+    classement.sort((a, b) => b.score - a.score);
+    const medailles = ["🥇", "🥈", "🥉"];
+    contenu.innerHTML = '<div class="classement">' +
+      classement.map((j, i) =>
+        '<div class="classement-ligne' + (i === 0 ? ' or' : '') + '">' +
+        (medailles[i] || (i + 1) + ".") + " " + j.nom + " — " + j.score + " pts" +
+        '</div>'
+      ).join("") +
+      '</div>';
+  }
+
+  document.getElementById("overlay").classList.add("visible");
+  setMessage(titre + " " + details, "fin");
+}
+
+function rejouer() {
+  document.getElementById("overlay").classList.remove("visible");
+  commencerPartie();
+}
+
+function allerMenu() {
+  document.getElementById("overlay").classList.remove("visible");
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  afficherEcran("menu");
+}
+
+// ============================================================
+//  SAUVEGARDE (localStorage)
+// ============================================================
+function ouvrirModalSave() {
+  document.getElementById("input-nom-save").value = "";
+  document.getElementById("modal-save").classList.remove("cache");
+  document.getElementById("input-nom-save").focus();
+}
+
+function fermerModalSave() {
+  document.getElementById("modal-save").classList.add("cache");
+}
+
+function confirmerSave() {
+  let nom = document.getElementById("input-nom-save").value.trim();
+  if (!nom) nom = nomJoueur(joueurActif) + " — " + modeJeu + " / " + difficulte;
+
+  const saves = JSON.parse(localStorage.getItem(CLE_SAVES) || "[]");
+  saves.unshift({
+    nom,
+    date: new Date().toLocaleString("fr-FR"),
+    modeJeu, difficulte,
+    casesNoires: Array.from(casesNoires),
+    plateau: JSON.parse(JSON.stringify(plateau)),
+    rateliers: JSON.parse(JSON.stringify(rateliers)),
+    scores: [...scores],
+    joueurActif,
+    tempsRestants: [...tempsRestants]
+  });
+  if (saves.length > MAX_SAVES) saves.length = MAX_SAVES;
+  localStorage.setItem(CLE_SAVES, JSON.stringify(saves));
+
+  fermerModalSave();
+  setMessage('Partie "' + nom + '" sauvegardée !', "succes");
+}
+
+// ============================================================
+//  CHARGEMENT (localStorage)
+// ============================================================
+function ouvrirChargement() {
+  const saves = JSON.parse(localStorage.getItem(CLE_SAVES) || "[]");
+  const liste = document.getElementById("liste-saves");
+  liste.innerHTML = "";
+
+  if (saves.length === 0) {
+    liste.innerHTML = "<p style='color:#7f8c8d;text-align:center;padding:20px'>Aucune sauvegarde trouvée.</p>";
+  } else {
+    saves.forEach((save, i) => {
+      const div = document.createElement("div");
+      div.className = "save-item";
+      div.innerHTML =
+        '<div class="save-info">' +
+          '<span class="save-nom">' + save.nom + '</span>' +
+          '<span class="save-meta">' + save.modeJeu + ' / ' + save.difficulte + ' — ' + save.date + '</span>' +
+        '</div>' +
+        '<div class="save-actions">' +
+          '<button class="btn-save-ok" onclick="chargerPartie(' + i + ')">Charger</button>' +
+          '<button class="btn-save-del" onclick="supprimerSave(' + i + ')">✕</button>' +
+        '</div>';
+      liste.appendChild(div);
+    });
+  }
+  afficherEcran("chargement");
+}
+
+function chargerPartie(index) {
+  const saves = JSON.parse(localStorage.getItem(CLE_SAVES) || "[]");
+  if (index < 0 || index >= saves.length) return;
+  const s = saves[index];
+
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+
+  modeJeu       = s.modeJeu;
+  difficulte    = s.difficulte;
+  casesNoires   = new Set(s.casesNoires);
+  plateau       = s.plateau;
+  rateliers     = s.rateliers;
+  scores        = s.scores;
+  joueurActif   = s.joueurActif;
+  tempsRestants = s.tempsRestants;
+  partieTerminee = false;
+
+  afficherEcran("jeu");
+  setMessage("Partie chargée ! À toi de jouer.", "succes");
+  afficher();
+
+  if (difficulte === "difficile") demarrerTimer();
+}
+
+function supprimerSave(index) {
+  const saves = JSON.parse(localStorage.getItem(CLE_SAVES) || "[]");
+  saves.splice(index, 1);
+  localStorage.setItem(CLE_SAVES, JSON.stringify(saves));
+  ouvrirChargement(); // rafraîchir la liste
+}
+
+// ============================================================
+//  LANCEMENT — afficher le menu au démarrage
+// ============================================================
+afficherEcran("menu");
+</script>
+</body>
+</html>
