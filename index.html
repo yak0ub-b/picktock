@@ -4,13 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>PickTok</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&family=Orbitron:wght@700;900&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      background: #1a252f;
+      background: #0a1628;
+      background-image: radial-gradient(ellipse at 50% 0%, #1a2a4a 0%, #0a1628 70%);
+      min-height: 100vh;
       color: white;
-      font-family: 'Segoe UI', Arial, sans-serif;
+      font-family: 'Nunito', 'Segoe UI', Arial, sans-serif;
     }
 
     /* ============================================================
@@ -19,7 +23,7 @@
     .ecran {
       position: fixed;
       inset: 0;
-      background: #1a252f;
+      background: transparent;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -34,17 +38,23 @@
        MENU PRINCIPAL
     ============================================================ */
     .menu-titre {
-      font-size: 3.5rem;
-      letter-spacing: 6px;
-      color: #f1c40f;
-      text-shadow: 0 0 30px #f1c40f88;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 4rem;
+      font-weight: 900;
+      letter-spacing: 8px;
+      background: linear-gradient(135deg, #f1c40f, #e67e22, #f1c40f);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 20px #f1c40f88);
       margin-bottom: 8px;
     }
     .menu-sous-titre {
-      color: #7f8c8d;
-      font-size: 0.9rem;
+      color: #8faabf;
+      font-size: 1rem;
       margin-bottom: 48px;
-      letter-spacing: 1px;
+      letter-spacing: 3px;
+      text-transform: uppercase;
     }
     .menu-btns {
       display: flex;
@@ -55,18 +65,23 @@
     .btn-menu {
       width: 100%;
       padding: 14px 20px;
-      border-radius: 10px;
-      border: none;
-      font-size: 1rem;
-      font-weight: bold;
+      border-radius: 14px;
+      border: 1px solid rgba(255,255,255,0.15);
+      font-family: 'Nunito', Arial, sans-serif;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: 0.5px;
       cursor: pointer;
-      transition: all 0.2s;
-      background: #2980b9;
+      transition: all 0.25s;
+      background: linear-gradient(135deg, #2980b9, #1a5a8a);
       color: white;
+      box-shadow: 0 4px 20px rgba(41,128,185,0.3), inset 0 1px 0 rgba(255,255,255,0.1);
     }
-    .btn-menu:hover { filter: brightness(1.2); transform: translateY(-2px); }
-    .btn-menu.ok  { background: #27ae60; }
-    .btn-menu.danger { background: #c0392b; }
+    .btn-menu:hover { filter: brightness(1.15); transform: translateY(-3px); box-shadow: 0 8px 25px rgba(41,128,185,0.5); }
+    .btn-menu.ok  { background: linear-gradient(135deg, #27ae60, #1e8449); box-shadow: 0 4px 20px rgba(39,174,96,0.3), inset 0 1px 0 rgba(255,255,255,0.1); }
+    .btn-menu.ok:hover { box-shadow: 0 8px 25px rgba(39,174,96,0.5); }
+    .btn-menu.danger { background: linear-gradient(135deg, #c0392b, #922b21); box-shadow: 0 4px 20px rgba(192,57,43,0.3), inset 0 1px 0 rgba(255,255,255,0.1); }
+    .btn-menu.danger:hover { box-shadow: 0 8px 25px rgba(192,57,43,0.5); }
 
     /* ============================================================
        ÉCRAN CONFIG
@@ -91,18 +106,19 @@
     }
     .btn-group { display: flex; gap: 10px; justify-content: center; }
     .btn-choice {
-      padding: 10px 24px;
-      border-radius: 8px;
-      border: 2px solid #7f8c8d;
-      background: transparent;
-      color: #bdc3c7;
+      padding: 11px 24px;
+      border-radius: 10px;
+      border: 2px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.05);
+      color: #8faabf;
       cursor: pointer;
+      font-family: 'Nunito', Arial, sans-serif;
       font-size: 0.95rem;
-      font-weight: bold;
+      font-weight: 700;
       transition: all 0.2s;
     }
-    .btn-choice:hover { border-color: #bdc3c7; color: white; }
-    .btn-choice.actif { border-color: #1abc9c; color: #1abc9c; background: #1abc9c22; }
+    .btn-choice:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.4); color: white; transform: translateY(-1px); }
+    .btn-choice.actif { border-color: #1abc9c; color: #1abc9c; background: rgba(26,188,156,0.15); box-shadow: 0 0 12px rgba(26,188,156,0.3); }
     .config-desc {
       margin-top: 10px;
       font-size: 0.85rem;
@@ -173,27 +189,31 @@
     }
     #modal-save.cache { display: none !important; }
     .modal-box {
-      background: #2c3e50;
-      border-radius: 16px;
+      background: rgba(10,22,40,0.96);
+      border-radius: 18px;
       padding: 36px 40px;
       text-align: center;
-      border: 2px solid #1abc9c;
+      border: 2px solid rgba(26,188,156,0.5);
       max-width: 420px;
       width: 90%;
+      backdrop-filter: blur(20px);
     }
-    .modal-box h3 { color: #1abc9c; font-size: 1.4rem; margin-bottom: 16px; }
-    .modal-box p  { color: #7f8c8d; font-size: 0.85rem; margin-bottom: 10px; }
+    .modal-box h3 { font-family: 'Orbitron', sans-serif; color: #1abc9c; font-size: 1.2rem; margin-bottom: 16px; }
+    .modal-box p  { color: #8faabf; font-size: 0.85rem; margin-bottom: 10px; }
     #input-nom-save {
       width: 100%;
       padding: 10px 14px;
-      border-radius: 8px;
-      border: 2px solid #1abc9c;
-      background: #34495e;
+      border-radius: 10px;
+      border: 2px solid rgba(26,188,156,0.5);
+      background: rgba(255,255,255,0.07);
       color: white;
+      font-family: 'Nunito', Arial, sans-serif;
       font-size: 1rem;
       margin-bottom: 20px;
       outline: none;
+      transition: border-color 0.2s;
     }
+    #input-nom-save:focus { border-color: #1abc9c; }
 
     /* ============================================================
        JEU (l'écran principal de jeu)
@@ -206,13 +226,19 @@
       align-items: center;
       padding: 16px 20px;
       z-index: 1;
+      background: transparent;
     }
     #ecran-jeu.cache { display: none !important; }
     #ecran-jeu h1 {
+      font-family: 'Orbitron', sans-serif;
       font-size: 1.8rem;
-      letter-spacing: 4px;
-      color: #f1c40f;
-      text-shadow: 0 0 16px #f1c40f66;
+      font-weight: 900;
+      letter-spacing: 5px;
+      background: linear-gradient(135deg, #f1c40f, #e67e22, #f1c40f);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 0 10px #f1c40f66);
       margin-bottom: 14px;
     }
 
@@ -225,18 +251,29 @@
       grid-template-columns: repeat(10, 58px);
       grid-template-rows: repeat(8, 58px);
       gap: 3px;
-      background: #2c3e50;
-      padding: 8px;
-      border-radius: 10px;
-      border: 2px solid #34495e;
+      background: #0d1f35;
+      padding: 10px;
+      border-radius: 14px;
+      border: 2px solid rgba(255,255,255,0.08);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
     }
     .case {
       width: 58px; height: 58px;
-      border-radius: 6px;
-      background: #34495e;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06);
       display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
     }
-    .case.neutralisee { background: #0d1b24; cursor: default; }
+    .case.neutralisee {
+      background: repeating-linear-gradient(
+        45deg,
+        rgba(0,0,0,0.5) 0px, rgba(0,0,0,0.5) 3px,
+        rgba(0,0,0,0.25) 3px, rgba(0,0,0,0.25) 6px
+      );
+      border: 1px solid rgba(0,0,0,0.4);
+      cursor: default;
+    }
 
     /* Jetons */
     .jeton {
@@ -248,46 +285,57 @@
       cursor: default;
       position: relative;
     }
-    .rouge.cap    { background: #e74c3c; border: 3px solid white; color: white; }
-    .bleu.cap     { background: #3498db; border: 3px solid white; color: white; }
-    .vert.cap     { background: #2ecc71; border: 3px solid white; color: #1a252f; }
-    .jaune.cap    { background: #f1c40f; border: 3px solid white; color: #1a252f; }
-    .violet.cap   { background: #9b59b6; border: 3px solid white; color: white; }
-    .rouge.ncap  { background: radial-gradient(circle, #e74c3c 28%, white 28%, white 68%, #e74c3c 68%); border: 3px solid #e74c3c; }
-    .bleu.ncap   { background: radial-gradient(circle, #3498db 28%, white 28%, white 68%, #3498db 68%); border: 3px solid #3498db; }
-    .vert.ncap   { background: radial-gradient(circle, #2ecc71 28%, white 28%, white 68%, #2ecc71 68%); border: 3px solid #2ecc71; }
-    .jaune.ncap  { background: radial-gradient(circle, #f1c40f 28%, white 28%, white 68%, #f1c40f 68%); border: 3px solid #f1c40f; }
-    .violet.ncap { background: radial-gradient(circle, #9b59b6 28%, white 28%, white 68%, #9b59b6 68%); border: 3px solid #9b59b6; }
-    .jeton.cap { cursor: pointer; box-shadow: 0 0 10px rgba(255,255,255,0.35); }
-    .jeton.cap:hover { transform: scale(1.13); box-shadow: 0 0 18px rgba(255,255,255,0.7); }
+    /* Jetons capturable — effet gemme 3D */
+    .rouge.cap  { background: radial-gradient(circle at 35% 30%, #ff7675, #e74c3c 50%, #c0392b); border: 2px solid rgba(255,255,255,0.75); box-shadow: 0 4px 20px rgba(231,76,60,0.6), inset 0 1px 4px rgba(255,255,255,0.5); color: white; }
+    .bleu.cap   { background: radial-gradient(circle at 35% 30%, #74b9ff, #3498db 50%, #2471a3); border: 2px solid rgba(255,255,255,0.75); box-shadow: 0 4px 20px rgba(52,152,219,0.6), inset 0 1px 4px rgba(255,255,255,0.5); color: white; }
+    .vert.cap   { background: radial-gradient(circle at 35% 30%, #55efc4, #2ecc71 50%, #27ae60); border: 2px solid rgba(255,255,255,0.75); box-shadow: 0 4px 20px rgba(46,204,113,0.6), inset 0 1px 4px rgba(255,255,255,0.5); color: #1a252f; }
+    .jaune.cap  { background: radial-gradient(circle at 35% 30%, #ffeaa7, #f1c40f 50%, #d4ac0d); border: 2px solid rgba(255,255,255,0.75); box-shadow: 0 4px 20px rgba(241,196,15,0.6), inset 0 1px 4px rgba(255,255,255,0.5); color: #1a252f; }
+    .violet.cap { background: radial-gradient(circle at 35% 30%, #d7bde2, #9b59b6 50%, #7d3c98); border: 2px solid rgba(255,255,255,0.75); box-shadow: 0 4px 20px rgba(155,89,182,0.6), inset 0 1px 4px rgba(255,255,255,0.5); color: white; }
+    /* Jetons non-capturable — face verso sombre */
+    .rouge.ncap  { background: radial-gradient(circle, #c0392b 0%, #7b241c 100%); border: 2px solid rgba(231,76,60,0.4); opacity: 0.6; }
+    .bleu.ncap   { background: radial-gradient(circle, #2471a3 0%, #154360 100%); border: 2px solid rgba(52,152,219,0.4); opacity: 0.6; }
+    .vert.ncap   { background: radial-gradient(circle, #27ae60 0%, #145a32 100%); border: 2px solid rgba(46,204,113,0.4); opacity: 0.6; }
+    .jaune.ncap  { background: radial-gradient(circle, #d4ac0d 0%, #7d6608 100%); border: 2px solid rgba(241,196,15,0.4); opacity: 0.6; }
+    .violet.ncap { background: radial-gradient(circle, #7d3c98 0%, #4a235a 100%); border: 2px solid rgba(155,89,182,0.4); opacity: 0.6; }
+    .jeton.cap { cursor: pointer; }
+    .jeton.cap:hover { transform: scale(1.18) translateY(-2px); filter: brightness(1.2); box-shadow: 0 8px 30px rgba(255,255,255,0.35) !important; }
     .jeton.cap::after {
       content: '';
       position: absolute; top: -4px; right: -4px;
       width: 11px; height: 11px;
       background: #2ecc71; border-radius: 50%; border: 2px solid white;
+      box-shadow: 0 0 6px #2ecc71;
     }
 
     /* Panneau latéral */
-    #panneau { display: flex; flex-direction: column; gap: 12px; min-width: 230px; max-width: 260px; }
+    #panneau { display: flex; flex-direction: column; gap: 10px; min-width: 230px; max-width: 260px; }
     .panel-box {
-      background: #2c3e50; border-radius: 10px;
-      padding: 12px 14px; border: 1px solid #34495e;
+      background: rgba(255,255,255,0.05);
+      border-radius: 14px;
+      padding: 12px 14px;
+      border: 1px solid rgba(255,255,255,0.1);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
     .panel-title {
-      font-size: 0.73rem; text-transform: uppercase;
-      letter-spacing: 2px; color: #7f8c8d; margin-bottom: 10px;
+      font-size: 0.7rem; text-transform: uppercase;
+      letter-spacing: 3px; color: rgba(255,255,255,0.4); margin-bottom: 10px;
     }
+
+    /* Score solo */
+    #score-solo { font-size: 2.6rem; font-weight: bold; color: #f1c40f; text-align: center; text-shadow: 0 0 20px rgba(241,196,15,0.5); }
 
     /* Râtelier solo */
     #ratelier-solo { display: flex; gap: 6px; flex-wrap: wrap; }
 
     /* Section joueur en multijoueur */
     .joueur-section {
-      background: #2c3e50; border-radius: 10px;
-      padding: 12px 14px; border: 2px solid #34495e;
-      transition: border-color 0.2s;
+      background: rgba(255,255,255,0.05); border-radius: 12px;
+      padding: 12px 14px; border: 2px solid rgba(255,255,255,0.1);
+      transition: border-color 0.2s, box-shadow 0.2s;
+      backdrop-filter: blur(10px);
     }
-    .joueur-section.actif { border-color: #1abc9c; }
+    .joueur-section.actif { border-color: #1abc9c; box-shadow: 0 0 16px rgba(26,188,156,0.25); }
     .joueur-header {
       display: flex; justify-content: space-between; align-items: center;
       margin-bottom: 8px; flex-wrap: wrap; gap: 4px;
@@ -300,23 +348,22 @@
     /* Cases du râtelier */
     .case-rat {
       width: 40px; height: 40px;
-      border-radius: 6px; background: #34495e;
-      border: 2px dashed #7f8c8d;
+      border-radius: 8px; background: rgba(255,255,255,0.04);
+      border: 2px dashed rgba(255,255,255,0.2);
       display: flex; align-items: center; justify-content: center;
     }
     .case-rat .jeton { width: 34px; height: 34px; font-size: 0.8rem; cursor: default; }
     .case-rat .jeton.cap::after { display: none; }
     .case-rat .jeton.cap:hover { transform: none; box-shadow: none; }
 
-    /* Score solo */
-    #score-solo { font-size: 2.4rem; font-weight: bold; color: #f1c40f; text-align: center; }
 
     /* Message */
     #message {
-      background: #2c3e50; border-radius: 8px;
-      padding: 10px 14px; font-size: 0.9rem; color: #ecf0f1;
+      background: rgba(255,255,255,0.05); border-radius: 10px;
+      padding: 10px 14px; font-size: 0.92rem; color: #ecf0f1;
       border-left: 4px solid #3498db; min-height: 44px;
       display: flex; align-items: center;
+      backdrop-filter: blur(10px);
     }
     #message.succes { border-left-color: #2ecc71; }
     #message.erreur { border-left-color: #e74c3c; }
@@ -325,30 +372,48 @@
     /* Boutons du panel */
     .panel-actions { display: flex; flex-direction: column; gap: 8px; }
     .btn-action {
-      width: 100%; padding: 9px;
-      border-radius: 8px; border: none;
-      font-size: 0.88rem; font-weight: bold;
+      width: 100%; padding: 10px;
+      border-radius: 10px; border: 1px solid rgba(41,128,185,0.5);
+      font-family: 'Nunito', Arial, sans-serif;
+      font-size: 0.9rem; font-weight: 700; letter-spacing: 0.3px;
       cursor: pointer; transition: all 0.2s;
-      background: #2980b9; color: white;
+      background: rgba(41,128,185,0.25); color: white;
     }
-    .btn-action:hover { filter: brightness(1.2); }
-    .btn-action.jaune { background: #d4ac0d; color: #1a252f; }
+    .btn-action:hover { background: rgba(41,128,185,0.45); transform: translateY(-1px); }
+    .btn-action.jaune { background: rgba(212,172,13,0.25); border-color: rgba(212,172,13,0.5); color: #f1c40f; }
+    .btn-action.jaune:hover { background: rgba(212,172,13,0.4); }
 
     /* Animation flash points */
     @keyframes fadeUp {
-      0%   { opacity: 1; transform: translateY(0); }
-      100% { opacity: 0; transform: translateY(-40px); }
+      0%   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+      30%  { opacity: 1; transform: translate(-50%, -70%) scale(1.3); }
+      100% { opacity: 0; transform: translate(-50%, -110%) scale(0.8); }
+    }
+    /* Animation pop capture */
+    @keyframes popOut {
+      0%   { transform: scale(1); opacity: 1; }
+      40%  { transform: scale(1.3); opacity: 0.8; }
+      100% { transform: scale(0); opacity: 0; }
+    }
+    /* Animation nouveau capturable */
+    @keyframes newCap {
+      0%   { box-shadow: 0 0 0 0 rgba(255,255,255,0.7); }
+      70%  { box-shadow: 0 0 0 10px rgba(255,255,255,0); }
+      100% { box-shadow: 0 0 0 0 rgba(255,255,255,0); }
     }
     #flash-pts {
       position: fixed; top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      font-size: 2.2rem; font-weight: bold; color: #2ecc71;
-      text-shadow: 0 0 20px #2ecc71;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 2.8rem; font-weight: bold; color: #f1c40f;
+      text-shadow: 0 0 30px #f1c40f, 0 0 60px rgba(241,196,15,0.5);
       pointer-events: none;
       z-index: 200;
       display: none;
     }
     #flash-pts.animating { display: block; animation: fadeUp 1.4s ease-out forwards; }
+    .jeton.capturing { animation: popOut 0.3s ease-out forwards; pointer-events: none; }
+    .jeton.new-cap { animation: newCap 0.6s ease-out; }
 
     /* Légende */
     #legende { display: flex; gap: 14px; font-size: 0.78rem; color: #7f8c8d; margin-top: 8px; }
@@ -417,33 +482,231 @@
     /* Overlay fin de partie */
     #overlay {
       display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.82);
+      background: rgba(0,0,0,0.85);
       align-items: center; justify-content: center;
       z-index: 100;
+      backdrop-filter: blur(4px);
     }
     #overlay.visible { display: flex; }
     #overlay-box {
-      background: #2c3e50; border-radius: 16px;
-      padding: 36px 44px; text-align: center;
-      border: 2px solid #f1c40f; max-width: 420px;
+      background: rgba(10,22,40,0.96); border-radius: 20px;
+      padding: 40px 48px; text-align: center;
+      border: 2px solid rgba(241,196,15,0.5); max-width: 440px; width: 90%;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 0 60px rgba(241,196,15,0.12);
     }
-    #overlay-box h2 { font-size: 1.8rem; color: #f1c40f; margin-bottom: 10px; }
-    #overlay-box p  { color: #bdc3c7; margin-bottom: 20px; font-size: 0.95rem; }
-    .score-final { font-size: 2.6rem; font-weight: bold; color: white; margin: 10px 0; }
+    #overlay-box h2 { font-family: 'Orbitron', sans-serif; font-size: 2rem; color: #f1c40f; margin-bottom: 10px; }
+    #overlay-box p  { color: #8faabf; margin-bottom: 20px; font-size: 0.95rem; }
+    .score-final { font-size: 3rem; font-weight: bold; color: #f1c40f; margin: 12px 0; text-shadow: 0 0 30px rgba(241,196,15,0.6); }
     .classement { font-size: 1rem; text-align: left; margin: 12px 0; }
     .classement-ligne {
-      padding: 6px 10px; border-radius: 6px; margin-bottom: 5px;
-      background: #34495e; font-weight: bold;
+      padding: 8px 12px; border-radius: 8px; margin-bottom: 6px;
+      background: rgba(255,255,255,0.07); font-weight: bold; border: 1px solid rgba(255,255,255,0.1);
     }
-    .classement-ligne.or { color: #f1c40f; border: 1px solid #f1c40f88; }
-    .overlay-btns { display: flex; gap: 12px; justify-content: center; }
+    .classement-ligne.or { color: #f1c40f; border-color: rgba(241,196,15,0.4); background: rgba(241,196,15,0.1); }
+    .overlay-btns { display: flex; gap: 12px; justify-content: center; margin-top: 8px; }
     .btn-overlay {
-      padding: 11px 24px; border: none; border-radius: 8px;
-      font-size: 0.95rem; font-weight: bold; cursor: pointer;
+      padding: 13px 30px; border: none; border-radius: 12px;
+      font-family: 'Nunito', sans-serif; font-size: 0.98rem; font-weight: 700; cursor: pointer;
+      transition: all 0.2s;
     }
-    .btn-overlay.replay { background: #f1c40f; color: #1a252f; }
-    .btn-overlay.menu   { background: #2980b9; color: white; }
-    .btn-overlay:hover  { filter: brightness(1.15); }
+    .btn-overlay.replay { background: linear-gradient(135deg, #f1c40f, #d4ac0d); color: #1a252f; box-shadow: 0 4px 15px rgba(241,196,15,0.4); }
+    .btn-overlay.menu   { background: linear-gradient(135deg, #2980b9, #1a5a8a); color: white; box-shadow: 0 4px 15px rgba(41,128,185,0.4); }
+    .btn-overlay:hover  { filter: brightness(1.15); transform: translateY(-2px); }
+
+    /* ============================================================
+       BOUTON FLOTTANT RÈGLES
+    ============================================================ */
+    #btn-regles-flottant {
+      position: fixed;
+      top: 14px; right: 14px;
+      width: 38px; height: 38px;
+      border-radius: 50%;
+      background: #f1c40f;
+      color: #1a252f;
+      border: none;
+      font-size: 1.15rem;
+      font-weight: 900;
+      cursor: pointer;
+      z-index: 300;
+      box-shadow: 0 2px 10px rgba(241,196,15,0.5);
+      display: flex; align-items: center; justify-content: center;
+      transition: transform 0.2s, box-shadow 0.2s;
+      line-height: 1;
+    }
+    #btn-regles-flottant:hover {
+      transform: scale(1.12);
+      box-shadow: 0 4px 18px rgba(241,196,15,0.7);
+    }
+
+    /* ============================================================
+       ÉCRAN RÈGLES DU JEU
+    ============================================================ */
+    #ecran-regles {
+      position: fixed;
+      inset: 0;
+      background: #0a1628;
+      background-image: radial-gradient(ellipse at 50% 0%, #1a2a4a 0%, #0a1628 70%);
+      z-index: 250;
+      overflow-y: auto;
+      padding: 24px 20px 40px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #ecran-regles.cache { display: none !important; }
+
+    .regles-header {
+      width: 100%;
+      max-width: 720px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+    }
+    .regles-titre {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.5rem;
+      font-weight: 900;
+      color: #f1c40f;
+      letter-spacing: 4px;
+      text-shadow: 0 0 14px #f1c40f66;
+    }
+    .btn-fermer-regles {
+      background: #2c3e50;
+      border: 2px solid #34495e;
+      color: #bdc3c7;
+      border-radius: 8px;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-weight: bold;
+      font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .btn-fermer-regles:hover { border-color: #f1c40f; color: #f1c40f; }
+
+    .regles-onglets {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .regles-contenu {
+      width: 100%;
+      max-width: 720px;
+    }
+    .regles-section { display: none; }
+    .regles-section.actif { display: block; }
+
+    .regle-card {
+      background: #2c3e50;
+      border-radius: 12px;
+      padding: 16px 20px;
+      margin-bottom: 14px;
+      border-left: 4px solid #3498db;
+    }
+    .regle-card.vert   { border-left-color: #2ecc71; }
+    .regle-card.jaune  { border-left-color: #f1c40f; }
+    .regle-card.rouge  { border-left-color: #e74c3c; }
+    .regle-card.violet { border-left-color: #9b59b6; }
+    .regle-card.cyan   { border-left-color: #1abc9c; }
+
+    .regle-card-titre {
+      font-weight: bold;
+      font-size: 1rem;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .regle-card-titre .num {
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      background: #3498db;
+      color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.8rem;
+      flex-shrink: 0;
+    }
+    .regle-card.vert   .num { background: #2ecc71; color: #1a252f; }
+    .regle-card.jaune  .num { background: #f1c40f; color: #1a252f; }
+    .regle-card.rouge  .num { background: #e74c3c; }
+    .regle-card.violet .num { background: #9b59b6; }
+    .regle-card.cyan   .num { background: #1abc9c; color: #1a252f; }
+
+    .regle-card p {
+      font-size: 0.9rem;
+      color: #bdc3c7;
+      line-height: 1.55;
+    }
+    .regle-card strong { color: white; }
+
+    .regle-score-box {
+      background: #1a252f;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-top: 10px;
+      font-size: 0.88rem;
+      color: #ecf0f1;
+      border: 1px solid #2c3e50;
+    }
+    .regle-score-box .ligne-score {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 0;
+    }
+    .regle-score-box .pts {
+      background: #f1c40f;
+      color: #1a252f;
+      border-radius: 12px;
+      padding: 1px 8px;
+      font-weight: bold;
+      font-size: 0.82rem;
+      flex-shrink: 0;
+    }
+    .regle-score-box .pts.rouge { background: #e74c3c; color: white; }
+    .regle-score-box .pts.vert  { background: #2ecc71; color: #1a252f; }
+
+    .mini-jetons-demo {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .mini-demo-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.82rem;
+      color: #7f8c8d;
+    }
+    .mini-jeton {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .mini-jeton.rouge-cap  { background: #e74c3c; border: 2px solid white; }
+    .mini-jeton.rouge-ncap { background: radial-gradient(circle, #e74c3c 28%, white 28%, white 68%, #e74c3c 68%); border: 2px solid #e74c3c; }
+    .mini-jeton.bleu-cap   { background: #3498db; border: 2px solid white; }
+    .mini-jeton.vert-cap   { background: #2ecc71; border: 2px solid white; }
+    .mini-jeton.jaune-cap  { background: #f1c40f; border: 2px solid white; }
+    .mini-jeton.violet-cap { background: #9b59b6; border: 2px solid white; }
+    .mini-jeton.joker-cap  {
+      background: linear-gradient(135deg, #e74c3c, #f1c40f, #2ecc71, #3498db, #9b59b6);
+      border: 2px solid white;
+    }
+
+    .regles-sous-titre {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #7f8c8d;
+      margin: 20px 0 10px;
+    }
 
     /* ============================================================
        RESPONSIVE — TABLETTE ≤ 820px
@@ -501,6 +764,9 @@
   </style>
 </head>
 <body>
+<!-- Bouton flottant Règles (accessible depuis tous les écrans) -->
+<button id="btn-regles-flottant" onclick="afficherRegles()" title="Règles du jeu">?</button>
+
 
 <!-- ============================================================
      ÉCRAN MENU PRINCIPAL
@@ -511,6 +777,7 @@
   <div class="menu-btns">
     <button class="btn-menu ok"     onclick="afficherEcran('config')">► Jouer</button>
     <button class="btn-menu"        onclick="ouvrirChargement()">📂 Charger une partie</button>
+    <button class="btn-menu"        onclick="afficherRegles()">📖 Règles du jeu</button>
     <button class="btn-menu danger" onclick="quitter()">✕ Quitter</button>
   </div>
 </div>
@@ -652,6 +919,148 @@
 <!-- Animation flash points -->
 <div id="flash-pts"></div>
 
+<!-- ============================================================
+     ÉCRAN RÈGLES DU JEU
+============================================================ -->
+<div id="ecran-regles" class="cache">
+
+  <div class="regles-header">
+    <div class="regles-titre">RÈGLES</div>
+    <button class="btn-fermer-regles" onclick="fermerRegles()">✕ Fermer</button>
+  </div>
+
+  <!-- Onglets -->
+  <div class="regles-onglets">
+    <button class="btn-choice actif" id="ong-general" onclick="changerOngletRegles('general')">🎯 Général</button>
+    <button class="btn-choice"       id="ong-solo"    onclick="changerOngletRegles('solo')">👤 Solo</button>
+    <button class="btn-choice"       id="ong-multi"   onclick="changerOngletRegles('multi')">👥 Multijoueur</button>
+  </div>
+
+  <div class="regles-contenu">
+
+    <!-- ═══════════════ ONGLET GÉNÉRAL ═══════════════ -->
+    <div id="section-general" class="regles-section actif">
+
+      <div class="regle-card">
+        <div class="regle-card-titre"><span class="num">🎲</span> Le matériel</div>
+        <p>
+          Un <strong>plateau 10 × 8</strong> rempli de jetons colorés.
+          Un <strong>râtelier de 5 cases</strong> où tu stockes les jetons capturés.
+          Les jetons existent en <strong>5 couleurs</strong> (rouge, bleu, vert, jaune, violet) et en version spéciale <strong>Joker ★</strong>.
+        </p>
+        <div class="mini-jetons-demo">
+          <div class="mini-demo-item"><div class="mini-jeton rouge-cap"></div> Rouge</div>
+          <div class="mini-demo-item"><div class="mini-jeton bleu-cap"></div> Bleu</div>
+          <div class="mini-demo-item"><div class="mini-jeton vert-cap"></div> Vert</div>
+          <div class="mini-demo-item"><div class="mini-jeton jaune-cap"></div> Jaune</div>
+          <div class="mini-demo-item"><div class="mini-jeton violet-cap"></div> Violet</div>
+          <div class="mini-demo-item"><div class="mini-jeton joker-cap"></div> Joker ★</div>
+        </div>
+      </div>
+
+      <div class="regle-card vert">
+        <div class="regle-card-titre"><span class="num">1</span> Faces des jetons</div>
+        <p>Chaque jeton a <strong>deux faces</strong> :</p>
+        <div class="mini-jetons-demo">
+          <div class="mini-demo-item"><div class="mini-jeton rouge-cap"></div> <span><strong style="color:white">Couleur pleine</strong> = Capturable (tu peux le prendre)</span></div>
+          <div class="mini-demo-item"><div class="mini-jeton rouge-ncap"></div> <span><strong style="color:white">Couleur partielle</strong> = Non capturable (bloqué)</span></div>
+        </div>
+      </div>
+
+      <div class="regle-card jaune">
+        <div class="regle-card-titre"><span class="num">2</span> Mise en place</div>
+        <p>
+          Tous les jetons sont placés <strong>face non capturable</strong> sur le plateau.
+          Seuls les jetons de la <strong>première ligne</strong> sont retournés face capturable au début.
+          Le râtelier est <strong>vide</strong>.
+        </p>
+      </div>
+
+      <div class="regle-card cyan">
+        <div class="regle-card-titre"><span class="num">3</span> Capturer un jeton</div>
+        <p>
+          Clique sur un jeton <strong>capturable</strong> (couleur pleine, point vert ●) pour le déplacer dans ton râtelier.
+          Après chaque capture, les <strong>voisins directs</strong> (haut, bas, gauche, droite — pas les diagonales) du jeton capturé sont automatiquement <strong>retournés</strong> côté capturable.
+        </p>
+      </div>
+
+      <div class="regle-card violet">
+        <div class="regle-card-titre"><span class="num">★</span> Le Joker</div>
+        <p>Le jeton <strong>Joker ★</strong> (arc-en-ciel) peut compléter <strong>n'importe quelle triplette</strong> de couleur. C'est la pièce la plus précieuse du jeu !</p>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════ ONGLET SOLO ═══════════════ -->
+    <div id="section-solo" class="regles-section">
+
+      <div class="regle-card cyan">
+        <div class="regle-card-titre"><span class="num">1</span> Objectif</div>
+        <p>Capturer un maximum de jetons et marquer le plus de points possible en retirant des <strong>triplettes</strong> de même couleur.</p>
+      </div>
+
+      <div class="regle-card vert">
+        <div class="regle-card-titre"><span class="num">2</span> La triplette</div>
+        <p>Dès que ton râtelier contient <strong>3 jetons de même couleur</strong>, ils sont automatiquement retirés du jeu et tu marques des points !</p>
+        <div class="regle-score-box">
+          <div class="ligne-score"><span class="pts vert">+2 pts</span> Si le râtelier était <strong>plein</strong> au moment du retrait</div>
+          <div class="ligne-score"><span class="pts">+1 pt</span> Si le râtelier n'était pas plein</div>
+        </div>
+      </div>
+
+      <div class="regle-card rouge">
+        <div class="regle-card-titre"><span class="num">3</span> Fin de partie</div>
+        <p>La partie se termine si le <strong>râtelier est plein</strong> (5 jetons) sans qu'une triplette soit possible.</p>
+        <p style="margin-top:8px">La partie continue tant qu'il reste des <strong>jetons capturables</strong> sur le plateau.</p>
+      </div>
+
+      <div class="regle-card jaune">
+        <div class="regle-card-titre"><span class="num">🏆</span> Bonus</div>
+        <p>Si tu réussis à éliminer <strong>tous les jetons du plateau</strong>, tu remportes un <strong>bonus de points</strong> !</p>
+      </div>
+
+      <div class="regle-card">
+        <div class="regle-card-titre"><span class="num">⏱</span> Mode Chrono</div>
+        <p>Même règles que le Solo, mais tu dois faire le meilleur score possible avant que le <strong>temps imparti</strong> soit écoulé !</p>
+      </div>
+
+    </div>
+
+    <!-- ═══════════════ ONGLET MULTIJOUEUR ═══════════════ -->
+    <div id="section-multi" class="regles-section">
+
+      <div class="regle-card cyan">
+        <div class="regle-card-titre"><span class="num">1</span> Tour par tour</div>
+        <p>Les joueurs jouent <strong>à tour de rôle</strong>. À chaque tour, le joueur actif (encadré vert) capture un jeton et le place dans le râtelier partagé.</p>
+      </div>
+
+      <div class="regle-card vert">
+        <div class="regle-card-titre"><span class="num">2</span> Marquer des points</div>
+        <p>C'est le joueur qui pose le <strong>dernier jeton d'une triplette</strong> qui marque les points.</p>
+        <div class="regle-score-box">
+          <div class="ligne-score"><span class="pts vert">+2 pts</span> Si le râtelier était <strong>plein</strong> et qu'une triplette est retirée</div>
+          <div class="ligne-score"><span class="pts">+1 pt</span> Si le râtelier n'était pas plein et qu'une triplette est retirée</div>
+        </div>
+      </div>
+
+      <div class="regle-card rouge">
+        <div class="regle-card-titre"><span class="num">3</span> Remplir sans triplette = pénalité</div>
+        <p>Si un joueur <strong>remplit le râtelier</strong> (5 jetons) sans créer de triplette, son score est <strong>remis à zéro</strong> et la partie s'arrête immédiatement.</p>
+        <div class="regle-score-box">
+          <div class="ligne-score"><span class="pts rouge">0 pt</span> Le joueur fautif perd tous ses points</div>
+        </div>
+      </div>
+
+      <div class="regle-card jaune">
+        <div class="regle-card-titre"><span class="num">4</span> Fin de partie</div>
+        <p>La partie se termine quand il n'y a <strong>plus aucun jeton capturable</strong> sur le plateau. Le joueur avec le <strong>plus grand score</strong> remporte la partie !</p>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
 <script>
 // ============================================================
 //  CONSTANTES
@@ -680,6 +1089,7 @@ let tempsRestants = [null]; // null = pas de timer
 let partieTerminee = false;
 let timerInterval  = null;
 let historique     = [];    // [{couleur, joueur}]
+let nouveauxCapturables = new Set(); // positions "col,lig" des jetons qui viennent de devenir capturables
 
 
 // ============================================================
@@ -698,6 +1108,21 @@ function quitter() {
   if (!window.close()) {
     afficherEcran("menu");
   }
+}
+
+function afficherRegles() {
+  document.getElementById("ecran-regles").classList.remove("cache");
+}
+
+function fermerRegles() {
+  document.getElementById("ecran-regles").classList.add("cache");
+}
+
+function changerOngletRegles(onglet) {
+  ["general", "solo", "multi"].forEach(o => {
+    document.getElementById("section-" + o).classList.toggle("actif", o === onglet);
+    document.getElementById("ong-" + o).classList.toggle("actif", o === onglet);
+  });
 }
 
 // ============================================================
@@ -799,6 +1224,7 @@ function commencerPartie() {
   joueurActif = 0;
   partieTerminee = false;
   historique  = [];
+  nouveauxCapturables = new Set();
 
   // Timer : chrono = 180s globaux, difficile = timer par joueur, sinon pas de timer
   if (modeJeu === "chrono") {
@@ -848,15 +1274,23 @@ function capturer(col, lig) {
     return;
   }
 
+  // Animation pop sur le jeton DOM avant de reconstruire le plateau
+  const gridCases = document.querySelectorAll("#plateau .case");
+  const jetonEl = gridCases[lig * NB_COL + col] ? gridCases[lig * NB_COL + col].querySelector(".jeton") : null;
+  if (jetonEl) jetonEl.classList.add("capturing");
+
   // Retirer du plateau
   const couleur = jeton.couleur;
   plateau[col][lig] = null;
 
-  // Retourner voisins
+  // Retourner voisins (et tracker les nouveaux capturables pour animation)
+  nouveauxCapturables = new Set();
   for (const [vc, vl] of [[col,lig-1],[col,lig+1],[col+1,lig],[col-1,lig]]) {
     if (vc >= 0 && vc < NB_COL && vl >= 0 && vl < NB_LIG
-        && plateau[vc][vl] && !plateau[vc][vl].capturable)
+        && plateau[vc][vl] && !plateau[vc][vl].capturable) {
       plateau[vc][vl].capturable = true;
+      nouveauxCapturables.add(vc + "," + vl);
+    }
   }
 
   r.push({ couleur });
@@ -1070,6 +1504,10 @@ function afficherPlateau() {
           const c = col, l = lig;
           caseDiv.style.cursor = "pointer";
           caseDiv.addEventListener("click", () => capturer(c, l));
+          // Animation pulse pour les jetons qui viennent de devenir capturables
+          if (nouveauxCapturables.has(col + "," + lig)) {
+            el.classList.add("new-cap");
+          }
         }
         caseDiv.appendChild(el);
       }
