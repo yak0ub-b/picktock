@@ -1,0 +1,11 @@
+# Fichiers universitaires — non publiés
+*.pdf
+*.ipynb
+*.py
+src/
+CLAUDE.md
+sauvegardes.json
+
+# Système
+.DS_Store
+Thumbs.db

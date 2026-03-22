@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PickTok</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #1a252f;
+      color: white;
+      font-family: 'Segoe UI', Arial, sans-serif;
+    }
+
+    /* ============================================================
+       ÉCRANS (superposés plein écran)
+    ============================================================ */
+    .ecran {
+      position: fixed;
+      inset: 0;
+      background: #1a252f;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+      overflow-y: auto;
+      padding: 30px 20px;
+    }
+    .ecran.cache { display: none !important; }
+
+    /* ============================================================
+       MENU PRINCIPAL
+    ============================================================ */
+    .menu-titre {
+      font-size: 3.5rem;
+      letter-spacing: 6px;
+      color: #f1c40f;
+      text-shadow: 0 0 30px #f1c40f88;
+      margin-bottom: 8px;
+    }
+    .menu-sous-titre {
+      color: #7f8c8d;
+      font-size: 0.9rem;
+      margin-bottom: 48px;
+      letter-spacing: 1px;
+    }
+    .menu-btns {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      width: 300px;
+    }
+    .btn-menu {
+      width: 100%;
+      padding: 14px 20px;
+      border-radius: 10px;
+      border: none;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: #2980b9;
+      color: white;
+    }
+    .btn-menu:hover { filter: brightness(1.2); transform: translateY(-2px); }
+    .btn-menu.ok  { background: #27ae60; }
+    .btn-menu.danger { background: #c0392b; }
+
+    /* ============================================================
+       ÉCRAN CONFIG
+    ============================================================ */
+    .config-titre {
+      font-size: 2rem;
+      color: #f1c40f;
+      margin-bottom: 36px;
+    }
+    .config-section {
+      width: 100%;
+      max-width: 500px;
+      margin-bottom: 28px;
+      text-align: center;
+    }
+    .config-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #7f8c8d;
+      margin-bottom: 12px;
+    }
+    .btn-group { display: flex; gap: 10px; justify-content: center; }
+    .btn-choice {
+      padding: 10px 24px;
+      border-radius: 8px;
+      border: 2px solid #7f8c8d;
+      background: transparent;
+      color: #bdc3c7;
+      cursor: pointer;
+      font-size: 0.95rem;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+    .btn-choice:hover { border-color: #bdc3c7; color: white; }
+    .btn-choice.actif { border-color: #1abc9c; color: #1abc9c; background: #1abc9c22; }
+    .config-desc {
+      margin-top: 10px;
+      font-size: 0.85rem;
+      color: #e74c3c;
+      min-height: 20px;
+    }
+    .config-actions {
+      display: flex;
+      gap: 14px;
+      justify-content: center;
+      margin-top: 10px;
+    }
+    .config-actions .btn-menu { width: auto; padding: 12px 28px; }
+
+    /* ============================================================
+       ÉCRAN CHARGEMENT
+    ============================================================ */
+    .charg-titre {
+      font-size: 2rem;
+      color: #f1c40f;
+      margin-bottom: 28px;
+    }
+    #liste-saves {
+      width: 100%;
+      max-width: 680px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: 60vh;
+      overflow-y: auto;
+      margin-bottom: 22px;
+    }
+    .save-item {
+      background: #2c3e50;
+      border-radius: 10px;
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border: 1px solid #34495e;
+    }
+    .save-info { display: flex; flex-direction: column; gap: 3px; }
+    .save-nom { font-weight: bold; font-size: 0.95rem; }
+    .save-meta { font-size: 0.78rem; color: #7f8c8d; }
+    .save-actions { display: flex; gap: 8px; }
+    .btn-save-ok {
+      padding: 7px 14px; background: #27ae60; color: white;
+      border: none; border-radius: 6px; cursor: pointer; font-weight: bold;
+    }
+    .btn-save-ok:hover { background: #2ecc71; }
+    .btn-save-del {
+      padding: 7px 10px; background: #c0392b; color: white;
+      border: none; border-radius: 6px; cursor: pointer; font-weight: bold;
+    }
+    .btn-save-del:hover { background: #e74c3c; }
+
+    /* ============================================================
+       MODAL SAUVEGARDE
+    ============================================================ */
+    #modal-save {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 80;
+    }
+    #modal-save.cache { display: none !important; }
+    .modal-box {
+      background: #2c3e50;
+      border-radius: 16px;
+      padding: 36px 40px;
+      text-align: center;
+      border: 2px solid #1abc9c;
+      max-width: 420px;
+      width: 90%;
+    }
+    .modal-box h3 { color: #1abc9c; font-size: 1.4rem; margin-bottom: 16px; }
+    .modal-box p  { color: #7f8c8d; font-size: 0.85rem; margin-bottom: 10px; }
+    #input-nom-save {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 2px solid #1abc9c;
+      background: #34495e;
+      color: white;
+      font-size: 1rem;
+      margin-bottom: 20px;
+      outline: none;
+    }
+
+    /* ============================================================
+       JEU (l'écran principal de jeu)
+    ============================================================ */
+    #ecran-jeu {
+      position: relative;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px 20px;
+      z-index: 1;
+    }
+    #ecran-jeu.cache { display: none !important; }
+    #ecran-jeu h1 {
+      font-size: 1.8rem;
+      letter-spacing: 4px;
+      color: #f1c40f;
+      text-shadow: 0 0 16px #f1c40f66;
+      margin-bottom: 14px;
+    }
+
+    /* Layout principal du jeu */
+    #jeu { display: flex; gap: 20px; align-items: flex-start; }
+
+    /* Plateau */
+    #plateau {
+      display: grid;
+      grid-template-columns: repeat(10, 58px);
+      grid-template-rows: repeat(8, 58px);
+      gap: 3px;
+      background: #2c3e50;
+      padding: 8px;
+      border-radius: 10px;
+      border: 2px solid #34495e;
+    }
+    .case {
+      width: 58px; height: 58px;
+      border-radius: 6px;
+      background: #34495e;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .case.neutralisee { background: #0d1b24; cursor: default; }
+
+    /* Jetons */
+    .jeton {
+      width: 48px; height: 48px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: bold; font-size: 1rem;
+      transition: transform 0.15s, box-shadow 0.15s;
+      cursor: default;
+      position: relative;
+    }
+    .rouge.cap    { background: #e74c3c; border: 3px solid white; color: white; }
+    .bleu.cap     { background: #3498db; border: 3px solid white; color: white; }
+    .vert.cap     { background: #2ecc71; border: 3px solid white; color: #1a252f; }
+    .jaune.cap    { background: #f1c40f; border: 3px solid white; color: #1a252f; }
+    .violet.cap   { background: #9b59b6; border: 3px solid white; color: white; }
+    .rouge.ncap  { background: radial-gradient(circle, #e74c3c 28%, white 28%, white 68%, #e74c3c 68%); border: 3px solid #e74c3c; }
+    .bleu.ncap   { background: radial-gradient(circle, #3498db 28%, white 28%, white 68%, #3498db 68%); border: 3px solid #3498db; }
+    .vert.ncap   { background: radial-gradient(circle, #2ecc71 28%, white 28%, white 68%, #2ecc71 68%); border: 3px solid #2ecc71; }
+    .jaune.ncap  { background: radial-gradient(circle, #f1c40f 28%, white 28%, white 68%, #f1c40f 68%); border: 3px solid #f1c40f; }
+    .violet.ncap { background: radial-gradient(circle, #9b59b6 28%, white 28%, white 68%, #9b59b6 68%); border: 3px solid #9b59b6; }
+    .jeton.cap { cursor: pointer; box-shadow: 0 0 10px rgba(255,255,255,0.35); }
+    .jeton.cap:hover { transform: scale(1.13); box-shadow: 0 0 18px rgba(255,255,255,0.7); }
+    .jeton.cap::after {
+      content: '';
+      position: absolute; top: -4px; right: -4px;
+      width: 11px; height: 11px;
+      background: #2ecc71; border-radius: 50%; border: 2px solid white;
+    }
+
+    /* Panneau latéral */
+    #panneau { display: flex; flex-direction: column; gap: 12px; min-width: 230px; max-width: 260px; }
+    .panel-box {
+      background: #2c3e50; border-radius: 10px;
+      padding: 12px 14px; border: 1px solid #34495e;
+    }
+    .panel-title {
+      font-size: 0.73rem; text-transform: uppercase;
+      letter-spacing: 2px; color: #7f8c8d; margin-bottom: 10px;
+    }
+
+    /* Râtelier solo */
+    #ratelier-solo { display: flex; gap: 6px; flex-wrap: wrap; }
+
+    /* Section joueur en multijoueur */
+    .joueur-section {
+      background: #2c3e50; border-radius: 10px;
+      padding: 12px 14px; border: 2px solid #34495e;
+      transition: border-color 0.2s;
+    }
+    .joueur-section.actif { border-color: #1abc9c; }
+    .joueur-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 8px; flex-wrap: wrap; gap: 4px;
+    }
+    .joueur-nom { font-weight: bold; font-size: 0.95rem; }
+    .joueur-score { color: #f1c40f; font-weight: bold; font-size: 1.05rem; }
+    .joueur-timer { font-size: 0.85rem; font-weight: bold; }
+    .joueur-rack { display: flex; gap: 5px; }
+
+    /* Cases du râtelier */
+    .case-rat {
+      width: 40px; height: 40px;
+      border-radius: 6px; background: #34495e;
+      border: 2px dashed #7f8c8d;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .case-rat .jeton { width: 34px; height: 34px; font-size: 0.8rem; cursor: default; }
+    .case-rat .jeton.cap::after { display: none; }
+    .case-rat .jeton.cap:hover { transform: none; box-shadow: none; }
+
+    /* Score solo */
+    #score-solo { font-size: 2.4rem; font-weight: bold; color: #f1c40f; text-align: center; }
+
+    /* Message */
+    #message {
+      background: #2c3e50; border-radius: 8px;
+      padding: 10px 14px; font-size: 0.9rem; color: #ecf0f1;
+      border-left: 4px solid #3498db; min-height: 44px;
+      display: flex; align-items: center;
+    }
+    #message.succes { border-left-color: #2ecc71; }
+    #message.erreur { border-left-color: #e74c3c; }
+    #message.fin    { border-left-color: #f1c40f; color: #f1c40f; }
+
+    /* Boutons du panel */
+    .panel-actions { display: flex; flex-direction: column; gap: 8px; }
+    .btn-action {
+      width: 100%; padding: 9px;
+      border-radius: 8px; border: none;
+      font-size: 0.88rem; font-weight: bold;
+      cursor: pointer; transition: all 0.2s;
+      background: #2980b9; color: white;
+    }
+    .btn-action:hover { filter: brightness(1.2); }
+    .btn-action.jaune { background: #d4ac0d; color: #1a252f; }
+
+    /* Animation flash points */
+    @keyframes fadeUp {
+      0%   { opacity: 1; transform: translateY(0); }
+      100% { opacity: 0; transform: translateY(-40px); }
+    }
+    #flash-pts {
+      position: fixed; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2.2rem; font-weight: bold; color: #2ecc71;
+      text-shadow: 0 0 20px #2ecc71;
+      pointer-events: none;
+      z-index: 200;
+      display: none;
+    }
+    #flash-pts.animating { display: block; animation: fadeUp 1.4s ease-out forwards; }
+
+    /* Légende */
+    #legende { display: flex; gap: 14px; font-size: 0.78rem; color: #7f8c8d; margin-top: 8px; }
+    .leg-item { display: flex; align-items: center; gap: 5px; }
+    .leg-jeton { width: 18px; height: 18px; border-radius: 50%; flex-shrink: 0; }
+    .leg-cap   { background: #e74c3c; border: 2px solid white; }
+    .leg-ncap  { background: radial-gradient(circle, #e74c3c 28%, white 28%, white 68%, #e74c3c 68%); border: 2px solid #e74c3c; }
+    .leg-neutr { background: #0d1b24; border: 2px solid #34495e; border-radius: 3px; }
+
+    /* ============================================================
+       JETON JOKER
+    ============================================================ */
+    @keyframes arc-en-ciel {
+      0%   { filter: hue-rotate(0deg)   brightness(1.1); }
+      100% { filter: hue-rotate(360deg) brightness(1.1); }
+    }
+    .joker.cap {
+      background: linear-gradient(135deg, #e74c3c 0%, #f1c40f 25%, #2ecc71 50%, #3498db 75%, #9b59b6 100%);
+      border: 3px solid white;
+      color: white;
+      text-shadow: 0 0 6px rgba(0,0,0,0.8);
+      animation: arc-en-ciel 2s linear infinite;
+      box-shadow: 0 0 14px rgba(255,255,255,0.6) !important;
+    }
+    .joker.ncap {
+      background: radial-gradient(circle, white 28%, transparent 28%),
+                  conic-gradient(#e74c3c, #f1c40f, #2ecc71, #3498db, #9b59b6, #e74c3c);
+      border: 3px solid #f1c40f;
+      animation: arc-en-ciel 3s linear infinite;
+    }
+    .leg-joker {
+      background: linear-gradient(135deg, #e74c3c, #f1c40f, #2ecc71, #3498db, #9b59b6);
+      border: 2px solid white;
+    }
+
+    /* ============================================================
+       HISTORIQUE DES COUPS
+    ============================================================ */
+    #box-historique { margin-top: 0; }
+    #historique-jetons { display: flex; gap: 5px; flex-wrap: wrap; align-items: center; margin-top: 4px; }
+    .hist-jeton {
+      width: 20px; height: 20px; border-radius: 50%; border: 2px solid white;
+      flex-shrink: 0; display: inline-block;
+    }
+    .hist-jeton.rouge  { background: #e74c3c; }
+    .hist-jeton.bleu   { background: #3498db; }
+    .hist-jeton.vert   { background: #2ecc71; }
+    .hist-jeton.jaune  { background: #f1c40f; }
+    .hist-jeton.violet { background: #9b59b6; }
+    .hist-jeton.joker  {
+      background: linear-gradient(135deg, #e74c3c, #f1c40f, #2ecc71, #3498db, #9b59b6);
+    }
+
+    /* ============================================================
+       CHRONO
+    ============================================================ */
+    #chrono-display {
+      text-align: center;
+      font-size: 2.8rem;
+      font-weight: bold;
+      letter-spacing: 3px;
+      margin-top: 4px;
+      transition: color 0.3s;
+    }
+
+    /* Overlay fin de partie */
+    #overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.82);
+      align-items: center; justify-content: center;
+      z-index: 100;
+    }
+    #overlay.visible { display: flex; }
+    #overlay-box {
+      background: #2c3e50; border-radius: 16px;
+      padding: 36px 44px; text-align: center;
+      border: 2px solid #f1c40f; max-width: 420px;
+    }
+    #overlay-box h2 { font-size: 1.8rem; color: #f1c40f; margin-bottom: 10px; }
+    #overlay-box p  { color: #bdc3c7; margin-bottom: 20px; font-size: 0.95rem; }
+    .score-final { font-size: 2.6rem; font-weight: bold; color: white; margin: 10px 0; }
+    .classement { font-size: 1rem; text-align: left; margin: 12px 0; }
+    .classement-ligne {
+      padding: 6px 10px; border-radius: 6px; margin-bottom: 5px;
+      background: #34495e; font-weight: bold;
+    }
+    .classement-ligne.or { color: #f1c40f; border: 1px solid #f1c40f88; }
+    .overlay-btns { display: flex; gap: 12px; justify-content: center; }
+    .btn-overlay {
+      padding: 11px 24px; border: none; border-radius: 8px;
+      font-size: 0.95rem; font-weight: bold; cursor: pointer;
+    }
+    .btn-overlay.replay { background: #f1c40f; color: #1a252f; }
+    .btn-overlay.menu   { background: #2980b9; color: white; }
+    .btn-overlay:hover  { filter: brightness(1.15); }
+  </style>
+</head>
+<body>
+
+<!-- ============================================================
+     ÉCRAN MENU PRINCIPAL
+============================================================ -->
+<div id="ecran-menu" class="ecran">
+  <h1 class="menu-titre">PICKTOK</h1>
+  <p class="menu-sous-titre">Jeu de plateau — Game Fan-Attic</p>
+  <div class="menu-btns">
+    <button class="btn-menu ok"     onclick="afficherEcran('config')">► Jouer</button>
+    <button class="btn-menu"        onclick="ouvrirChargement()">📂 Charger une partie</button>
+    <button class="btn-menu danger" onclick="quitter()">✕ Quitter</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     ÉCRAN CONFIG
+============================================================ -->
+<div id="ecran-config" class="ecran cache">
+  <h2 class="config-titre">Nouvelle partie</h2>
+
+  <div class="config-section">
+    <div class="config-label">Mode de jeu</div>
+    <div class="btn-group" id="groupe-mode">
+      <button class="btn-choice actif" onclick="choisirMode('solo')">Solo</button>
+      <button class="btn-choice"       onclick="choisirMode('chrono')">⏱ Chrono</button>
+      <button class="btn-choice"       onclick="choisirMode('duo')">Duo</button>
+      <button class="btn-choice"       onclick="choisirMode('trio')">Trio</button>
+    </div>
+    <p id="desc-mode" class="config-desc"></p>
+  </div>
+
+  <div class="config-section">
+    <div class="config-label">Difficulté</div>
+    <div class="btn-group" id="groupe-diff">
+      <button class="btn-choice actif" onclick="choisirDiff('facile')">Facile</button>
+      <button class="btn-choice"       onclick="choisirDiff('normal')">Normal</button>
+      <button class="btn-choice"       onclick="choisirDiff('difficile')">Difficile</button>
+    </div>
+    <p id="desc-diff" class="config-desc"></p>
+  </div>
+
+  <div class="config-actions">
+    <button class="btn-menu" onclick="afficherEcran('menu')">← Retour</button>
+    <button class="btn-menu ok" onclick="commencerPartie()">Commencer</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     ÉCRAN CHARGEMENT
+============================================================ -->
+<div id="ecran-chargement" class="ecran cache">
+  <h2 class="charg-titre">📂 Charger une partie</h2>
+  <div id="liste-saves"></div>
+  <div class="config-actions">
+    <button class="btn-menu" onclick="afficherEcran('menu')">← Retour</button>
+  </div>
+</div>
+
+<!-- ============================================================
+     MODAL SAUVEGARDE
+============================================================ -->
+<div id="modal-save" class="cache">
+  <div class="modal-box">
+    <h3>💾 Sauvegarder la partie</h3>
+    <p>Donne un nom à ta partie :</p>
+    <input type="text" id="input-nom-save" placeholder="Ex: Partie de Jean..."
+           maxlength="40" onkeydown="if(event.key==='Enter') confirmerSave()">
+    <div class="config-actions">
+      <button class="btn-menu danger" onclick="fermerModalSave()">Annuler</button>
+      <button class="btn-menu ok"     onclick="confirmerSave()">💾 Sauvegarder</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     ÉCRAN JEU
+============================================================ -->
+<div id="ecran-jeu" class="cache">
+  <h1>PICKTOK</h1>
+
+  <div id="jeu">
+    <!-- Plateau -->
+    <div id="plateau-container">
+      <div id="plateau"></div>
+      <div id="legende">
+        <div class="leg-item"><div class="leg-jeton leg-cap"></div> Capturable</div>
+        <div class="leg-item"><div class="leg-jeton leg-ncap"></div> Non capturable</div>
+        <div class="leg-item"><div class="leg-jeton leg-neutr"></div> Case noire</div>
+        <div class="leg-item"><div class="leg-jeton leg-joker"></div> Joker ★</div>
+      </div>
+    </div>
+
+    <!-- Panneau latéral -->
+    <div id="panneau">
+      <div id="message">Bonne chance !</div>
+
+      <!-- Zone joueurs (construite dynamiquement) -->
+      <div id="zone-joueurs"></div>
+
+      <!-- Score solo (affiché uniquement en solo) -->
+      <div class="panel-box" id="box-score-solo" style="display:none;">
+        <div class="panel-title">Score</div>
+        <div id="score-solo">0</div>
+      </div>
+
+      <!-- Râtelier solo -->
+      <div class="panel-box" id="box-rat-solo" style="display:none;">
+        <div class="panel-title">Râtelier — 5 cases</div>
+        <div id="ratelier-solo"></div>
+      </div>
+
+      <!-- Chrono global (mode Chrono) -->
+      <div class="panel-box" id="box-chrono" style="display:none;">
+        <div class="panel-title">⏱ Chrono</div>
+        <div id="chrono-display">3:00</div>
+      </div>
+
+      <!-- Historique des coups -->
+      <div class="panel-box" id="box-historique">
+        <div class="panel-title">Derniers capturés</div>
+        <div id="historique-jetons"></div>
+      </div>
+
+      <!-- Boutons -->
+      <div class="panel-actions">
+        <button class="btn-action jaune" onclick="afficherEcran('config')">↩ Rejouer</button>
+        <button class="btn-action"       onclick="ouvrirModalSave()">💾 Sauvegarder</button>
+        <button class="btn-action"       onclick="afficherEcran('menu')">🏠 Menu</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     OVERLAY FIN DE PARTIE
+============================================================ -->
+<div id="overlay">
+  <div id="overlay-box">
+    <h2 id="overlay-titre">Fin de partie</h2>
+    <div id="overlay-contenu"></div>
+    <p id="overlay-msg"></p>
+    <div class="overlay-btns">
+      <button class="btn-overlay replay" onclick="rejouer()">↩ Rejouer</button>
+      <button class="btn-overlay menu"   onclick="allerMenu()">🏠 Menu</button>
+    </div>
+  </div>
+</div>
+
+<!-- Animation flash points -->
+<div id="flash-pts"></div>
+
+<script>
+// ============================================================
+//  CONSTANTES
+// ============================================================
+const NB_COL = 10;
+const NB_LIG = 8;
+const TAILLE_RAT = 5;
+const BONUS_VIDE = 20;
+const COULEURS = ["rouge", "bleu", "vert", "jaune", "violet"];
+const CLE_SAVES = "picktok_sauvegardes";
+const MAX_SAVES = 15;
+const NB_NOIRES = { facile: 6, normal: 12, difficile: 18 };
+const TIMERS    = { facile: null, normal: null, difficile: 120 };
+
+// ============================================================
+//  ÉTAT DU JEU
+// ============================================================
+let modeJeu     = "solo";   // "solo" | "chrono" | "duo" | "trio"
+let difficulte  = "facile"; // "facile" | "normal" | "difficile"
+let casesNoires = new Set();
+let plateau     = [];       // plateau[col][lig] = {couleur, capturable} | null
+let rateliers   = [[]];     // rateliers[i] = tableau de {couleur} pour joueur i
+let scores      = [0];
+let joueurActif = 0;
+let tempsRestants = [null]; // null = pas de timer
+let partieTerminee = false;
+let timerInterval  = null;
+let historique     = [];    // [{couleur, joueur}]
+
+
+// ============================================================
+//  NAVIGATION ENTRE ÉCRANS
+// ============================================================
+function afficherEcran(nom) {
+  ["menu", "config", "chargement"].forEach(e =>
+    document.getElementById("ecran-" + e).classList.toggle("cache", e !== nom)
+  );
+  document.getElementById("ecran-jeu").classList.toggle("cache", nom !== "jeu");
+  document.getElementById("modal-save").classList.add("cache");
+  document.getElementById("overlay").classList.remove("visible");
+}
+
+function quitter() {
+  if (!window.close()) {
+    afficherEcran("menu");
+  }
+}
+
+// ============================================================
+//  CONFIGURATION
+// ============================================================
+function choisirMode(m) {
+  modeJeu = m;
+  document.querySelectorAll("#groupe-mode .btn-choice").forEach((btn, i) => {
+    btn.classList.toggle("actif", ["solo","chrono","duo","trio"][i] === m);
+  });
+  const desc = document.getElementById("desc-mode");
+  if (desc) desc.textContent = m === "chrono" ? "⏱ Score maximum en 3 minutes — 1 joueur, pas de timer par tour." : "";
+}
+
+function choisirDiff(d) {
+  difficulte = d;
+  document.querySelectorAll("#groupe-diff .btn-choice").forEach((btn, i) => {
+    btn.classList.toggle("actif", ["facile","normal","difficile"][i] === d);
+  });
+  const desc = document.getElementById("desc-diff");
+  desc.textContent = d === "difficile"
+    ? "⏱ Timer 2 minutes par joueur — faites vite !"
+    : "";
+}
+
+// ============================================================
+//  GÉNÉRATION DES CASES NOIRES (BFS)
+// ============================================================
+function genererCasesNoires(diff) {
+  const nb = NB_NOIRES[diff];
+  if (nb === 0) return new Set();
+
+  // Candidats : toutes les cases sauf la ligne 0
+  const candidats = [];
+  for (let col = 0; col < NB_COL; col++)
+    for (let lig = 1; lig < NB_LIG; lig++)
+      candidats.push(col + "," + lig);
+
+  for (let t = 0; t < 200; t++) {
+    const essai = new Set(tirerAleat(candidats, nb));
+    if (plateauJouable(essai)) return essai;
+  }
+  return new Set(tirerAleat(candidats, Math.floor(nb / 2)));
+}
+
+function tirerAleat(arr, n) {
+  return [...arr].sort(() => Math.random() - 0.5).slice(0, n);
+}
+
+function plateauJouable(casesN) {
+  const total = NB_COL * NB_LIG;
+  const libres = total - casesN.size;
+  if (libres < total * 0.5) return false;
+
+  let lig0 = 0;
+  for (let col = 0; col < NB_COL; col++)
+    if (!casesN.has(col + ",0")) lig0++;
+  if (lig0 < 5) return false;
+
+  // BFS depuis ligne 0
+  const depart = [];
+  for (let col = 0; col < NB_COL; col++)
+    if (!casesN.has(col + ",0")) depart.push(col + ",0");
+
+  const visites = new Set(depart);
+  const file = [...depart];
+  while (file.length > 0) {
+    const pos = file.pop();
+    const [c, l] = pos.split(",").map(Number);
+    for (const [dc, dl] of [[0,1],[0,-1],[1,0],[-1,0]]) {
+      const nc = c + dc, nl = l + dl;
+      if (nc >= 0 && nc < NB_COL && nl >= 0 && nl < NB_LIG) {
+        const k = nc + "," + nl;
+        if (!casesN.has(k) && !visites.has(k)) {
+          visites.add(k);
+          file.push(k);
+        }
+      }
+    }
+  }
+  // 100% des cases libres doivent être accessibles depuis la ligne 0
+  // (garantit qu'aucun jeton n'est jamais enfermé dans une poche noire)
+  return visites.size >= libres;
+}
+
+// ============================================================
+//  DÉMARRAGE D'UNE PARTIE
+// ============================================================
+function nbJ() { return { solo: 1, chrono: 1, duo: 2, trio: 3 }[modeJeu]; }
+function nomJoueur(i) { return ["Joueur 1", "Joueur 2", "Joueur 3"][i]; }
+
+function commencerPartie() {
+  const nb = nbJ();
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+
+  casesNoires = genererCasesNoires(difficulte);
+  rateliers   = Array.from({length: nb}, () => []);
+  scores      = Array(nb).fill(0);
+  joueurActif = 0;
+  partieTerminee = false;
+  historique  = [];
+
+  // Timer : chrono = 180s globaux, difficile = timer par joueur, sinon pas de timer
+  if (modeJeu === "chrono") {
+    tempsRestants = [180];
+  } else {
+    const tInit = TIMERS[difficulte];
+    tempsRestants = Array(nb).fill(tInit !== null ? tInit : null);
+  }
+
+  // Construire le plateau
+  plateau = [];
+  for (let col = 0; col < NB_COL; col++) {
+    plateau[col] = [];
+    for (let lig = 0; lig < NB_LIG; lig++) {
+      if (casesNoires.has(col + "," + lig)) {
+        plateau[col][lig] = null;
+      } else {
+        // 5% de chance d'être un joker
+        const couleur = Math.random() < 0.05 ? "joker" : COULEURS[Math.floor(Math.random() * COULEURS.length)];
+        plateau[col][lig] = { couleur, capturable: lig === 0 };
+      }
+    }
+  }
+
+  afficherEcran("jeu");
+  setMessage("Cliquez sur un jeton capturable (point vert) pour commencer.", "");
+  afficher();
+
+  if (modeJeu === "chrono" || difficulte === "difficile") demarrerTimer();
+}
+
+// ============================================================
+//  LOGIQUE DE JEU
+// ============================================================
+function capturer(col, lig) {
+  if (partieTerminee) return;
+
+  const jeton = plateau[col][lig];
+  if (!jeton || !jeton.capturable) {
+    setMessage("Ce jeton n'est pas capturable.", "erreur");
+    return;
+  }
+
+  const r = rateliers[joueurActif];
+  if (r.length >= TAILLE_RAT) {
+    setMessage("Ton râtelier est plein ! Impossible de capturer.", "erreur");
+    return;
+  }
+
+  // Retirer du plateau
+  const couleur = jeton.couleur;
+  plateau[col][lig] = null;
+
+  // Retourner voisins
+  for (const [vc, vl] of [[col,lig-1],[col,lig+1],[col+1,lig],[col-1,lig]]) {
+    if (vc >= 0 && vc < NB_COL && vl >= 0 && vl < NB_LIG
+        && plateau[vc][vl] && !plateau[vc][vl].capturable)
+      plateau[vc][vl].capturable = true;
+  }
+
+  r.push({ couleur });
+  historique.push({ couleur, joueur: joueurActif });
+  const rPlein = (r.length === TAILLE_RAT);
+  const nom = nbJ() > 1 ? nomJoueur(joueurActif) + " : " : "";
+  let msg = nom + "jeton " + couleur + " capturé !";
+
+  // Vérifier triplet dans le rack du joueur actif
+  const triplet = chercherTriplet(r);
+  if (triplet) {
+    const pts = rPlein ? 2 : 1;
+    retirerTriplet(r, triplet, pts);
+    msg += "  Triplet " + triplet + " ! +" + pts + " pt(s).";
+    flashPoints("+" + pts + " pts !");
+    setMessage(msg, "succes");
+  } else if (rPlein) {
+    // Rack plein sans triplet
+    scores[joueurActif] = 0;
+    partieTerminee = true;
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    afficher();
+    finDePartie(
+      "Râtelier bloqué !",
+      nomJoueur(joueurActif) + " a rempli son râtelier sans triplet — score remis à zéro.",
+      buildScoreTexte()
+    );
+    return;
+  } else {
+    setMessage(msg, "");
+  }
+
+  // Passer au joueur suivant
+  if (!partieTerminee && nbJ() > 1) {
+    joueurActif = (joueurActif + 1) % nbJ();
+  }
+
+  // Vérifier fin (plus de capturables)
+  if (!partieTerminee && getTousCapturables().length === 0) {
+    partieTerminee = true;
+    if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+    const tousRetires = estVide();
+    if ((modeJeu === "solo" || modeJeu === "chrono") && tousRetires) scores[0] += BONUS_VIDE;
+    afficher();
+    if (modeJeu === "solo" || modeJeu === "chrono") {
+      finDePartie(
+        tousRetires ? "BRAVO !!!" : "Fin de partie",
+        tousRetires ? "Bonus +" + BONUS_VIDE + " pts — tous les jetons éliminés !" : "Plus aucun jeton capturable.",
+        "Score : " + scores[0] + " pt(s)"
+      );
+    } else {
+      finDePartie("Fin de partie !", buildGagnant(), buildScoreTexte());
+    }
+    return;
+  }
+
+  afficher();
+}
+
+function chercherTriplet(rack) {
+  const jokers = rack.filter(j => j.couleur === "joker").length;
+  const cpt = {};
+  for (const j of rack) {
+    if (j.couleur === "joker") continue;
+    cpt[j.couleur] = (cpt[j.couleur] || 0) + 1;
+    if (cpt[j.couleur] + jokers >= 3) return j.couleur;
+  }
+  if (jokers >= 3) return "joker"; // 3 jokers seuls = triplette joker
+  return null;
+}
+
+function retirerTriplet(rack, couleur, pts) {
+  // Retire 3 jetons de la couleur donnée (les jokers complètent si nécessaire)
+  let n = 0;
+  const nouveau = rack.filter(j => {
+    if (n < 3 && (j.couleur === couleur || j.couleur === "joker")) { n++; return false; }
+    return true;
+  });
+  rack.length = 0;
+  rack.push(...nouveau);
+  scores[joueurActif] += pts;
+}
+
+function getTousCapturables() {
+  const res = [];
+  for (let col = 0; col < NB_COL; col++)
+    for (let lig = 0; lig < NB_LIG; lig++)
+      if (plateau[col][lig] && plateau[col][lig].capturable)
+        res.push([col, lig]);
+  return res;
+}
+
+function estVide() {
+  for (let col = 0; col < NB_COL; col++)
+    for (let lig = 0; lig < NB_LIG; lig++)
+      if (plateau[col][lig]) return false;
+  return true;
+}
+
+function buildScoreTexte() {
+  if (modeJeu === "solo" || modeJeu === "chrono") return "Score : " + scores[0] + " pt(s)";
+  return scores.slice(0, nbJ()).map((s, i) => nomJoueur(i) + " : " + s + " pts").join("  |  ");
+}
+
+function buildGagnant() {
+  const nb = nbJ();
+  const max = Math.max(...scores.slice(0, nb));
+  const gagnants = [];
+  for (let i = 0; i < nb; i++) if (scores[i] === max) gagnants.push(nomJoueur(i));
+  return gagnants.length === 1 ? gagnants[0] + " gagne !" : "Égalité entre " + gagnants.join(" et ") + " !";
+}
+
+// ============================================================
+//  TIMER (mode difficile)
+// ============================================================
+function formaterTemps(s) {
+  s = Math.ceil(Math.max(0, s));
+  return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");
+}
+function couleurTimer(s) {
+  if (s <= 30) return "#e74c3c";
+  if (s <= 60) return "#f1c40f";
+  return "#ecf0f1";
+}
+
+function demarrerTimer() {
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(() => {
+    if (partieTerminee) { clearInterval(timerInterval); return; }
+
+    if (modeJeu === "chrono") {
+      // Timer global décroissant
+      tempsRestants[0] = Math.max(0, tempsRestants[0] - 0.1);
+      const el = document.getElementById("chrono-display");
+      if (el) {
+        el.textContent = formaterTemps(tempsRestants[0]);
+        el.style.color = couleurTimer(tempsRestants[0]);
+      }
+      if (tempsRestants[0] <= 0) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        partieTerminee = true;
+        afficher();
+        finDePartie("⏱ Temps écoulé !", "Le temps est épuisé — voici ton score !", "Score : " + scores[0] + " pt(s)");
+      }
+      return;
+    }
+
+    const j = joueurActif;
+    if (tempsRestants[j] === null) return;
+    tempsRestants[j] = Math.max(0, tempsRestants[j] - 0.1);
+
+    // Mettre à jour l'affichage du timer uniquement (éviter de reconstruire tout)
+    const el = document.getElementById("timer-j" + j);
+    if (el) {
+      el.textContent = "⏱ " + formaterTemps(tempsRestants[j]);
+      el.style.color = couleurTimer(tempsRestants[j]);
+    }
+
+    if (tempsRestants[j] <= 0) {
+      setMessage("⏱ Temps écoulé pour " + nomJoueur(j) + " !", "erreur");
+      const nb = nbJ();
+      const tousEpuises = tempsRestants.slice(0, nb).every(t => t !== null && t <= 0);
+      if (tousEpuises) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        partieTerminee = true;
+        afficher();
+        finDePartie("Temps écoulé !", "Tous les joueurs ont épuisé leur temps.", buildScoreTexte());
+        return;
+      }
+      // Passer au suivant avec du temps
+      let suivant = (j + 1) % nb;
+      while (tempsRestants[suivant] !== null && tempsRestants[suivant] <= 0)
+        suivant = (suivant + 1) % nb;
+      joueurActif = suivant;
+      afficher();
+    }
+  }, 100);
+}
+
+// ============================================================
+//  AFFICHAGE
+// ============================================================
+function afficher() {
+  afficherPlateau();
+  afficherZoneJoueurs();
+}
+
+function afficherPlateau() {
+  const div = document.getElementById("plateau");
+  div.innerHTML = "";
+  for (let lig = 0; lig < NB_LIG; lig++) {
+    for (let col = 0; col < NB_COL; col++) {
+      const caseDiv = document.createElement("div");
+      if (casesNoires.has(col + "," + lig)) {
+        caseDiv.className = "case neutralisee";
+        div.appendChild(caseDiv);
+        continue;
+      }
+      caseDiv.className = "case";
+      const jeton = plateau[col][lig];
+      if (jeton) {
+        const el = document.createElement("div");
+        const face = jeton.capturable ? "cap" : "ncap";
+        el.className = "jeton " + jeton.couleur + " " + face;
+        el.title = jeton.capturable
+          ? "Capturer : " + jeton.couleur
+          : "Non capturable : " + jeton.couleur;
+        if (jeton.capturable && !partieTerminee) {
+          const c = col, l = lig;
+          el.addEventListener("click", () => capturer(c, l));
+        }
+        caseDiv.appendChild(el);
+      }
+      div.appendChild(caseDiv);
+    }
+  }
+}
+
+function afficherZoneJoueurs() {
+  const nb = nbJ();
+  const zone = document.getElementById("zone-joueurs");
+  zone.innerHTML = "";
+
+  // Affichage chrono global
+  const boxChrono = document.getElementById("box-chrono");
+  if (boxChrono) {
+    const visible = modeJeu === "chrono";
+    boxChrono.style.display = visible ? "" : "none";
+    if (visible) {
+      const el = document.getElementById("chrono-display");
+      if (el) {
+        el.textContent = formaterTemps(tempsRestants[0]);
+        el.style.color = couleurTimer(tempsRestants[0]);
+      }
+    }
+  }
+
+  // Historique des coups
+  const histEl = document.getElementById("historique-jetons");
+  if (histEl) {
+    const derniers = historique.slice(-5).reverse();
+    histEl.innerHTML = derniers.length === 0
+      ? '<span style="color:#7f8c8d;font-size:0.85rem">Aucun coup joué</span>'
+      : derniers.map(h =>
+          '<span class="hist-jeton ' + h.couleur + '" title="' + h.couleur + '"></span>'
+        ).join("");
+  }
+
+  const soloScore = document.getElementById("box-score-solo");
+  const soloRat   = document.getElementById("box-rat-solo");
+
+  if (modeJeu === "solo" || modeJeu === "chrono") {
+    soloScore.style.display = "";
+    soloRat.style.display   = "";
+    document.getElementById("score-solo").textContent = scores[0];
+    // Afficher le râtelier solo
+    const rat = document.getElementById("ratelier-solo");
+    rat.innerHTML = "";
+    const r = rateliers[0];
+    for (let i = 0; i < TAILLE_RAT; i++) {
+      const caseDiv = document.createElement("div");
+      caseDiv.className = "case-rat";
+      if (i < r.length) {
+        const el = document.createElement("div");
+        el.className = "jeton " + r[i].couleur + " cap";
+        caseDiv.appendChild(el);
+      }
+      rat.appendChild(caseDiv);
+    }
+  } else {
+    soloScore.style.display = "none";
+    soloRat.style.display   = "none";
+    // Afficher une section par joueur
+    for (let i = 0; i < nb; i++) {
+      const sect = document.createElement("div");
+      sect.className = "joueur-section" + (i === joueurActif && !partieTerminee ? " actif" : "");
+
+      // En-tête : nom | score | timer
+      const header = document.createElement("div");
+      header.className = "joueur-header";
+
+      const nomEl = document.createElement("span");
+      nomEl.className = "joueur-nom";
+      nomEl.textContent = (i === joueurActif && !partieTerminee ? "► " : "") + nomJoueur(i);
+      header.appendChild(nomEl);
+
+      const scoreEl = document.createElement("span");
+      scoreEl.className = "joueur-score";
+      scoreEl.textContent = scores[i] + " pts";
+      header.appendChild(scoreEl);
+
+      if (tempsRestants[i] !== null) {
+        const timerEl = document.createElement("span");
+        timerEl.className = "joueur-timer";
+        timerEl.id = "timer-j" + i;
+        timerEl.textContent = "⏱ " + formaterTemps(tempsRestants[i]);
+        timerEl.style.color = couleurTimer(tempsRestants[i]);
+        header.appendChild(timerEl);
+      }
+
+      sect.appendChild(header);
+
+      // Râtelier
+      const rack = document.createElement("div");
+      rack.className = "joueur-rack";
+      const r = rateliers[i];
+      for (let slot = 0; slot < TAILLE_RAT; slot++) {
+        const caseDiv = document.createElement("div");
+        caseDiv.className = "case-rat";
+        if (slot < r.length) {
+          const el = document.createElement("div");
+          el.className = "jeton " + r[slot].couleur + " cap";
+          caseDiv.appendChild(el);
+        }
+        rack.appendChild(caseDiv);
+      }
+      sect.appendChild(rack);
+      zone.appendChild(sect);
+    }
+  }
+}
+
+function setMessage(texte, type) {
+  const el = document.getElementById("message");
+  el.textContent = texte;
+  el.className = type || "";
+}
+
+// ============================================================
+//  ANIMATION FLASH POINTS
+// ============================================================
+function flashPoints(texte) {
+  const el = document.getElementById("flash-pts");
+  el.textContent = texte;
+  el.classList.remove("animating");
+  void el.offsetWidth; // force reflow
+  el.classList.add("animating");
+  setTimeout(() => el.classList.remove("animating"), 1500);
+}
+
+// ============================================================
+//  OVERLAY FIN DE PARTIE
+// ============================================================
+function finDePartie(titre, details, scoreTexte) {
+  document.getElementById("overlay-titre").textContent = titre;
+  document.getElementById("overlay-msg").textContent   = details;
+
+  const contenu = document.getElementById("overlay-contenu");
+  const nb = nbJ();
+
+  if (nb === 1) {
+    contenu.innerHTML = '<div class="score-final">' + scoreTexte + '</div>';
+  } else {
+    // Classement avec médailles
+    const classement = Array.from({length: nb}, (_, i) => ({ nom: nomJoueur(i), score: scores[i] }));
+    classement.sort((a, b) => b.score - a.score);
+    const medailles = ["🥇", "🥈", "🥉"];
+    contenu.innerHTML = '<div class="classement">' +
+      classement.map((j, i) =>
+        '<div class="classement-ligne' + (i === 0 ? ' or' : '') + '">' +
+        (medailles[i] || (i + 1) + ".") + " " + j.nom + " — " + j.score + " pts" +
+        '</div>'
+      ).join("") +
+      '</div>';
+  }
+
+  document.getElementById("overlay").classList.add("visible");
+  setMessage(titre + " " + details, "fin");
+}
+
+function rejouer() {
+  document.getElementById("overlay").classList.remove("visible");
+  commencerPartie();
+}
+
+function allerMenu() {
+  document.getElementById("overlay").classList.remove("visible");
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+  afficherEcran("menu");
+}
+
+// ============================================================
+//  SAUVEGARDE (localStorage)
+// ============================================================
+function ouvrirModalSave() {
+  document.getElementById("input-nom-save").value = "";
+  document.getElementById("modal-save").classList.remove("cache");
+  document.getElementById("input-nom-save").focus();
+}
+
+function fermerModalSave() {
+  document.getElementById("modal-save").classList.add("cache");
+}
+
+function confirmerSave() {
+  let nom = document.getElementById("input-nom-save").value.trim();
+  if (!nom) nom = nomJoueur(joueurActif) + " — " + modeJeu + " / " + difficulte;
+
+  const saves = JSON.parse(localStorage.getItem(CLE_SAVES) || "[]");
+  saves.unshift({
+    nom,
+    date: new Date().toLocaleString("fr-FR"),
+    modeJeu, difficulte,
+    casesNoires: Array.from(casesNoires),
+    plateau: JSON.parse(JSON.stringify(plateau)),
+    rateliers: JSON.parse(JSON.stringify(rateliers)),
+    scores: [...scores],
+    joueurActif,
+    tempsRestants: [...tempsRestants]
+  });
+  if (saves.length > MAX_SAVES) saves.length = MAX_SAVES;
+  localStorage.setItem(CLE_SAVES, JSON.stringify(saves));
+
+  fermerModalSave();
+  setMessage('Partie "' + nom + '" sauvegardée !', "succes");
+}
+
+// ============================================================
+//  CHARGEMENT (localStorage)
+// ============================================================
+function ouvrirChargement() {
+  const saves = JSON.parse(localStorage.getItem(CLE_SAVES) || "[]");
+  const liste = document.getElementById("liste-saves");
+  liste.innerHTML = "";
+
+  if (saves.length === 0) {
+    liste.innerHTML = "<p style='color:#7f8c8d;text-align:center;padding:20px'>Aucune sauvegarde trouvée.</p>";
+  } else {
+    saves.forEach((save, i) => {
+      const div = document.createElement("div");
+      div.className = "save-item";
+      div.innerHTML =
+        '<div class="save-info">' +
+          '<span class="save-nom">' + save.nom + '</span>' +
+          '<span class="save-meta">' + save.modeJeu + ' / ' + save.difficulte + ' — ' + save.date + '</span>' +
+        '</div>' +
+        '<div class="save-actions">' +
+          '<button class="btn-save-ok" onclick="chargerPartie(' + i + ')">Charger</button>' +
+          '<button class="btn-save-del" onclick="supprimerSave(' + i + ')">✕</button>' +
+        '</div>';
+      liste.appendChild(div);
+    });
+  }
+  afficherEcran("chargement");
+}
+
+function chargerPartie(index) {
+  const saves = JSON.parse(localStorage.getItem(CLE_SAVES) || "[]");
+  if (index < 0 || index >= saves.length) return;
+  const s = saves[index];
+
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+
+  modeJeu       = s.modeJeu;
+  difficulte    = s.difficulte;
+  casesNoires   = new Set(s.casesNoires);
+  plateau       = s.plateau;
+  rateliers     = s.rateliers;
+  scores        = s.scores;
+  joueurActif   = s.joueurActif;
+  tempsRestants = s.tempsRestants;
+  partieTerminee = false;
+
+  afficherEcran("jeu");
+  setMessage("Partie chargée ! À toi de jouer.", "succes");
+  afficher();
+
+  if (difficulte === "difficile") demarrerTimer();
+}
+
+function supprimerSave(index) {
+  const saves = JSON.parse(localStorage.getItem(CLE_SAVES) || "[]");
+  saves.splice(index, 1);
+  localStorage.setItem(CLE_SAVES, JSON.stringify(saves));
+  ouvrirChargement(); // rafraîchir la liste
+}
+
+// ============================================================
+//  LANCEMENT — afficher le menu au démarrage
+// ============================================================
+afficherEcran("menu");
+</script>
+</body>
+</html>
