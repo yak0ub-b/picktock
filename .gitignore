@@ -9,3 +9,5 @@ sauvegardes.json
 # Système
 .DS_Store
 Thumbs.db
+node_modules/
+package-lock.json
