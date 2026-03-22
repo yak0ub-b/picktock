@@ -444,6 +444,60 @@
     .btn-overlay.replay { background: #f1c40f; color: #1a252f; }
     .btn-overlay.menu   { background: #2980b9; color: white; }
     .btn-overlay:hover  { filter: brightness(1.15); }
+
+    /* ============================================================
+       RESPONSIVE — TABLETTE ≤ 820px
+    ============================================================ */
+    @media (max-width: 820px) {
+      #jeu { flex-direction: column; align-items: center; gap: 12px; }
+      #plateau {
+        grid-template-columns: repeat(10, 44px);
+        grid-template-rows: repeat(8, 44px);
+      }
+      .case { width: 44px; height: 44px; }
+      .jeton { width: 36px; height: 36px; font-size: 0.78rem; }
+      .jeton.cap::after { width: 9px; height: 9px; top: -3px; right: -3px; }
+      #panneau { min-width: unset; max-width: 100%; width: 100%; flex-direction: row; flex-wrap: wrap; }
+      .panel-box { flex: 1 1 160px; }
+      #ecran-jeu h1 { font-size: 1.4rem; margin-bottom: 8px; }
+    }
+
+    /* ============================================================
+       RESPONSIVE — MOBILE PORTRAIT ≤ 500px
+    ============================================================ */
+    @media (max-width: 500px) {
+      #ecran-jeu { padding: 8px 6px; }
+      #plateau {
+        grid-template-columns: repeat(10, 33px);
+        grid-template-rows: repeat(8, 33px);
+        gap: 2px;
+        padding: 5px;
+      }
+      .case { width: 33px; height: 33px; }
+      .jeton { width: 27px; height: 27px; font-size: 0.6rem; }
+      .jeton.cap::after { width: 7px; height: 7px; top: -2px; right: -2px; }
+      #panneau { flex-direction: column; }
+      .panel-box { flex: unset; }
+      #ecran-jeu h1 { font-size: 1.1rem; }
+      .menu-btns { width: 100%; padding: 0 16px; }
+      #groupe-mode, #groupe-diff { flex-wrap: wrap; gap: 6px; }
+      .btn-choice { padding: 9px 16px; font-size: 0.88rem; }
+      #overlay-box { padding: 20px 16px; width: 92vw; }
+      .score-final { font-size: 2.2rem; }
+      #legende { flex-wrap: wrap; gap: 6px 10px; font-size: 0.72rem; }
+    }
+
+    /* ============================================================
+       RESPONSIVE — TRÈS PETIT MOBILE ≤ 360px
+    ============================================================ */
+    @media (max-width: 360px) {
+      #plateau {
+        grid-template-columns: repeat(10, 29px);
+        grid-template-rows: repeat(8, 29px);
+      }
+      .case { width: 29px; height: 29px; }
+      .jeton { width: 23px; height: 23px; font-size: 0.55rem; }
+    }
   </style>
 </head>
 <body>
@@ -1014,7 +1068,8 @@ function afficherPlateau() {
           : "Non capturable : " + jeton.couleur;
         if (jeton.capturable && !partieTerminee) {
           const c = col, l = lig;
-          el.addEventListener("click", () => capturer(c, l));
+          caseDiv.style.cursor = "pointer";
+          caseDiv.addEventListener("click", () => capturer(c, l));
         }
         caseDiv.appendChild(el);
       }
